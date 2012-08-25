@@ -14,5 +14,5 @@ Critters (the cones) start with 100 energy which decays over time. Eating food (
 Basic heuristic behaviour has been implemented for testing:
 
 * If a critter can see at least one food item, it moves towards the closest food item.
-* Otherwise, it moves around randomly.
+* Otherwise, critters move around randomly.
 * If a critter has energy to spare (over 130), and it is not currently moving towards food, then it will periodically create a child.
