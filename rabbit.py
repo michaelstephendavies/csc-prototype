@@ -28,9 +28,14 @@ class World(object):
         # A note on co-ordinate systems.
         # The simulation model has two co-ordinate axes, whereas
         # VPython has three co-ordinate axes.
+        
         # We map a simulation point (x, y) to the VPython point (x, z, y)
         # where z is some arbitrary level above the "floor" of the world which
         # depends on the specific kind of object.
+        
+        # The simulation model has a toroidal topology (x and y co-ordinates
+        # "wrap around"); we keep all x values in [0, width) and y values in
+        # [0, height).
         self.width = width
         self.height = height
         self.objects = []
@@ -39,7 +44,7 @@ class World(object):
                 random.random()*(width-2)+1, random.random()*(height-2), random.random()*2*pi))
             
         for i in xrange(10):
-            self.objects.append(Food(len(self.objects), random.random()*(width-2)+1,
+            self.objects.append(Food(self, len(self.objects), random.random()*(width-2)+1,
                 random.random()*(height-2)+1, FOOD_ENERGY))
 
     def delete(self, obj):
@@ -69,7 +74,7 @@ class World(object):
                 obj.update()
 
             if counter % FOOD_SPAWN_PERIOD == 0:
-                self.add(Food(0, random.random()*(self.width-2)+1,
+                self.add(Food(self, 0, random.random()*(self.width-2)+1,
                               random.random()*(self.height-2)+1, FOOD_ENERGY))
                 
             counter += 1
@@ -82,7 +87,8 @@ class Object(object):
     In addition to overriding show, kill and update, all Objects
     must have the following attributes:
     object_ID - unique identifier for the object
-    x, y - current simulation co-ordinates of the object """
+    x, y - current simulation co-ordinates of the object
+    world - reference to the containing World"""
     
     def __init__(self):
         raise NotImplementedError("Override in your subclass")
@@ -102,11 +108,22 @@ class Object(object):
     def distance_sq(self, other):
         """ Find the square of the distance between this Object and
         another Object. """
-        return (self.x - other.x)**2 + (self.y - other.y)**2  
+
+        # Since the world wraps around, it's not just a straight Euclidean
+        # distance. We find the shorter x distance (either going across the
+        # world in the normal way, or wrapping around the left/right edge).
+        # Then we do the same for the y, then use these in the Euclidean
+        # distance formula.
+        
+        dx = min(abs(self.x - other.x), self.world.width - abs(self.x - other.x))
+        dy = min(abs(self.y - other.y), self.world.height - abs(self.y - other.y))
+        
+        return dx**2 + dy**2  
 
 
 class Food(Object):
-    def __init__(self, object_ID, x, y, contained_energy):
+    def __init__(self, world, object_ID, x, y, contained_energy):
+        self.world = world
         self.object_ID = object_ID
         self.x = x
         self.y = y
@@ -141,10 +158,39 @@ class Critter(Object):
             self.representation.visible = False
         
         def update(self):
-            # Find all objects close enough to be visible to the agent
-            visible_objects = [obj for obj in self.world.objects \
-                if obj != self \
-                and self.distance_sq(obj) < CRITTER_VIEW_DISTANCE_SQ]
+            # Find all objects close enough to be visible to the agent;
+            # tag each along with its delta-x and delta-y values relative
+            # to this object
+            visible_objects = []
+            for obj in self.world.objects:
+                if obj != self:
+                    # There's two different ways to get from self.x to obj.x:
+                    # directly, or around the left/right edge. We calculate
+                    # both of these and get two possible "delta x" values
+                    # Example: width=100, self.x=40, obj.x=80. Then
+                    # dxDirect = +40 (40 units from left to right)
+                    # and dxAround = -60 (60 units from right to left)
+                    dxDirect = obj.x - self.x
+                    if obj.x >= self.x:
+                        dxAround = dxDirect - self.world.width
+                    else:
+                        dxAround = dxDirect + self.world.width
+
+                    # Take the shorter one, i.e. the one with smaller
+                    # absolute value
+                    dx = min((dxDirect, dxAround), key = abs)
+
+                    # And the same with the y values
+                    dyDirect = obj.y - self.y
+                    if obj.y >= self.y:
+                        dyAround = dyDirect - self.world.height
+                    else:
+                        dyAround = dyDirect + self.world.height
+                        
+                    dy = min((dyDirect, dyAround), key = abs)
+
+                    if dx**2 + dy**2 < CRITTER_VIEW_DISTANCE_SQ:
+                        visible_objects.append((obj, dx, dy))
 
             # Ask the agent what to do
             (turn_angle, move_distance, reproduce) = \
@@ -156,7 +202,14 @@ class Critter(Object):
             self.direction %= 2*pi
             self.x += cos(self.direction) * move_distance
             self.y += sin(self.direction) * move_distance
-            
+
+            # Wrap around
+            while self.x < 0: self.x += self.world.width
+            while self.x >= self.world.width: self.x -= self.world.width
+            while self.y < 0: self.y += self.world.height
+            while self.y >= self.world.height: self.y -= self.world.height
+
+            # Update representation
             self.representation.axis = rotate((1, 0, 0), self.direction, (0, -1, 0))
             self.representation.pos = (self.x, 0.75, self.y)
 
@@ -166,12 +219,6 @@ class Critter(Object):
                                 (self.direction + pi)%(2*pi)) # FIXME: object_ID
                 self.world.add(child)
                 self.energy -= REPRODUCTION_COST
-            
-            # Collide with edges of world
-            if self.x > self.world.width: self.x = self.world.width
-            elif self.x < 0: self.x = 0
-            if self.y > self.world.height: self.y = self.world.height
-            elif self.y < 0: self.y = 0
 
             # Eat food
             for obj in self.world.objects:
@@ -191,16 +238,31 @@ class Agent(object):
         self.clock = 0
 
     def compute_next_action(self, critter, visible_objects):
-        """ Returns a tuple (turn_angle, move_distance, reproduce)
+        """ Given the current state of the critter and a list of visible
+        objects, returns the next set of actions for this agent's critter.
+
+        critter is just the Critter instance
+        visible_objects is a list of triples (obj, dx, dy) where:
+        * obj is an Object instance
+        * dx is the "delta-x" of the object relative to the critter
+        * dy is the "delta-y" of the object relative to the critter
+        Note that dx and dy have already taken into account the fact
+        that the world wraps around.
+        
+        Returns a tuple (turn_angle, move_distance, reproduce)
         where reproduce is a boolean, which tells the given critter
         what to do. """
 
         self.clock += 1
         
-        visible_food = [obj for obj in visible_objects if isinstance(obj, Food)]
-        if visible_food != []:
-            closest_food = min(visible_food, key = critter.distance_sq)
-            angle = atan2(closest_food.y - critter.y, closest_food.x - critter.x)
+        visible_food_positions = [(dx, dy) for (obj, dx, dy) in visible_objects
+                                  if isinstance(obj, Food)]
+        
+        if visible_food_positions != []:
+            (closest_food_dx, closest_food_dy) = min(visible_food_positions,
+                                                     key = lambda (dx, dy): dx**2 + dy**2)
+            
+            angle = atan2(closest_food_dy, closest_food_dx)
             return (angle - critter.direction, CRITTER_MAX_MOVE_SPEED, False)
         else:
             reproduce = False
