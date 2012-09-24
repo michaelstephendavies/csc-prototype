@@ -1,6 +1,5 @@
 from __future__ import division
 
-#from visual import *
 import os, sys
 import pygame
 from pygame.locals import *
@@ -14,108 +13,130 @@ REPRODUCTION_COST = 30
 CRITTER_ENERGY_DECAY_RATE = 0.2
 FOOD_SPAWN_PERIOD = 50
 FOOD_ENERGY = 50
-FLOOR_COLOUR = (0.2, 1, 0.2)
-FOOD_COLOUR = (0, 0.5, 0)
-CRITTER_COLOUR = (1, 0, 0)
 CRITTER_VIEW_DISTANCE = 100
 CRITTER_VIEW_DISTANCE_SQ = CRITTER_VIEW_DISTANCE**2
 CRITTER_MAX_MOVE_SPEED = 0.5
 REPRODUCTION_PERIOD = 120
-COLLISION_RADIUS = 50
+COLLISION_RADIUS = 10
 COLLISION_RADIUS_SQ = COLLISION_RADIUS**2
-FRAMERATE = 50
-ANIMATION_MOVE_INTERVAL = 8
 MEAN_TURN_INTERVAL = 10
+
+WORLD_WIDTH = 640
+WORLD_HEIGHT = 640
+TILE_SIZE = 64
+
+FRAMERATE = 50
+ANIMATION_FRAME_INTERVAL = 8
 CRITTER_VERTICAL_CENTER = 48
 CRITTER_HORIZONTAL_CENTER = 16
+FOOD_CENTER = 8
+
+images = None
+
+def get_images():
+    # Returns list of lists where:
+    #  first list is the animation frames for walking east
+    #  second list is the animation frames for walking south
+    #  second list is the animation frames for walking west
+    #  second list is the animation frames for walking north
+
+    global images
+    
+    if images == None:
+        images = [
+            # east
+            [
+                pygame.image.load('boy_east_walk1.png').convert(),
+                pygame.image.load('boy_east_walk2.png').convert()
+            ],
+            # south
+            [
+                pygame.image.load('boy_south_walk1.png').convert(),
+                pygame.image.load('boy_south_walk2.png').convert()
+            ],
+            # west
+            [
+                pygame.image.load('boy_west_walk1.png').convert(),
+                pygame.image.load('boy_west_walk2.png').convert()
+            ],
+            # north
+            [
+                pygame.image.load('boy_north_walk1.png').convert(),
+                pygame.image.load('boy_north_walk2.png').convert()
+            ],
+        ]
+        
+    return images
+
+food_image = None
+
+def get_food_image():
+    global food_image
+
+    if food_image == None:
+        food_image = pygame.image.load('small_food_bush.png').convert_alpha()
+
+    return food_image
 
 class World(object):
-    def __init__(self, width, height, screen):
-        
-        # A note on co-ordinate systems.
-        # The simulation model has two co-ordinate axes, whereas
-        # VPython has three co-ordinate axes.
-        
-        # We map a simulation point (x, y) to the VPython point (x, z, y)
-        # where z is some arbitrary level above the "floor" of the world which
-        # depends on the specific kind of object.
+    def __init__(self, screen):
         
         # The simulation model has a toroidal topology (x and y co-ordinates
         # "wrap around"); we keep all x values in [0, width) and y values in
         # [0, height).
-        self.width = width
-        self.height = height
+        
+        # (0, 0) in the simulation model maps to the top-left corner,
+        # positive y is down. Directions are given with positive being clockwise.
         self.objects = []
         self.screen = screen
-        boy_south1 = pygame.image.load('boy_south_walk1.png').convert()
-        boy_south2 = pygame.image.load('boy_south_walk2.png').convert()
-        boy_north1 = pygame.image.load('boy_north_walk1.png').convert()
-        boy_north2 = pygame.image.load('boy_north_walk2.png').convert()
-        boy_east1 = pygame.image.load('boy_east_walk1.png').convert()
-        boy_east2 = pygame.image.load('boy_east_walk2.png').convert()
-        boy_west1 = pygame.image.load('boy_west_walk1.png').convert()
-        boy_west2 = pygame.image.load('boy_west_walk2.png').convert()
+        
         for i in xrange(10):
             self.objects.append(Critter(self, len(self.objects),
-                random.random()*(width-2)+1, random.random()*(height-2)+1, (3*pi)/2, 
-                            screen, 0, CRITTER_HORIZONTAL_CENTER, CRITTER_VERTICAL_CENTER,
-                            boy_south1, boy_south2, boy_north1, boy_north2, 
-                            boy_east1, boy_east2, boy_west1, boy_west2))
-        #for i in xrange(5):
-        #    self.objects.append(Critter(self, len(self.objects),
-        #        random.random()*(width-2)+1, random.random()*(height-2), random.random()*2*pi))
+                random.random()*WORLD_WIDTH, random.random()*WORLD_HEIGHT, 0, 
+                            0, get_images())) # TODO: random counter_offset
             
         for i in xrange(10):
-            self.objects.append(Food(self, len(self.objects), random.random()*(width-2)+1,
-                random.random()*(height-2)+1, FOOD_ENERGY, 8, 8, self.screen))
-
+            self.objects.append(Food(self, len(self.objects), random.random()*WORLD_WIDTH,
+                random.random()*WORLD_HEIGHT, FOOD_ENERGY))
+    
     def delete(self, obj):
         obj.kill()        
         self.objects.remove(obj)
 
     def add(self, new_obj):
-        new_obj.show()
         self.objects.append(new_obj)
     
     def run(self):
-        # Create the floor
-        #box(pos = (self.width/2, 0, self.height/2), length = self.width, height = 0.5,
-        #    width = self.height, color = FLOOR_COLOUR)
-        
-        # Reposition the camera so it is looking at the center of the world
-        #scene.center = (self.width/2, 0, self.height/2)
-        
-        for obj in self.objects:
-            obj.show()
-
         counter = 0
-        
-        
         background = pygame.image.load('tile_grass.png').convert()
-        
         
         while True:
             clock = pygame.time.Clock()
             clock.tick(FRAMERATE)
+            
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
-            for i in range(10):
-                for j in range(10):
-                    self.screen.blit(background, (i*64, j*64))
+                
+            for x in xrange(0, WORLD_WIDTH, TILE_SIZE):
+                for y in xrange(0, WORLD_HEIGHT, TILE_SIZE):
+                    self.screen.blit(background, (x, y))
+                    
             # Iterate over a copy of the object list since modifying a list
             # while iterating over it is problematic
             for obj in self.objects:
                 obj.update()
+            
             if counter % FOOD_SPAWN_PERIOD == 0:
-                self.add(Food(self, 0, random.random()*(self.width-2)+1,
-                              random.random()*(self.height-2)+1, FOOD_ENERGY, 8, 8, self.screen))
-            pygame.display.flip()
-            
+                self.add(Food(self, 0, random.random()*WORLD_WIDTH,
+                              random.random()*WORLD_HEIGHT, FOOD_ENERGY))
+
+            for obj in self.objects:
+                obj.render(self.screen)
                 
-            counter += 1
-            
-            #rate(SIMULATION_RATE)      
+            pygame.display.flip()
+                
+            counter += 1    
 
 class Object(object):
     """ Abstract base class for simulation objects.
@@ -129,17 +150,19 @@ class Object(object):
     def __init__(self):
         raise NotImplementedError("Override in your subclass")
     
-    def show(self):
-        """ Called when the object first becomes visible. """
-        raise NotImplementedError("Override in your subclass")
-    
     def kill(self):
         """ Called when the object is destroyed. """
-        raise NotImplementedError("Override in your subclass")
+        pass
     
     def update(self):
-        """ Called once every simulation step. """
-        raise NotImplementedError("Override in your subclass")
+        """ Called once every simulation step, to update the
+        object's simulation model. """
+        pass
+
+    def render(self, screen):
+        """ Called once every simulation step, to draw the
+        object to the screen. """
+        pass
     
     def distance_sq(self, other):
         """ Find the square of the distance between this Object and
@@ -150,88 +173,48 @@ class Object(object):
         # world in the normal way, or wrapping around the left/right edge).
         # Then we do the same for the y, then use these in the Euclidean
         # distance formula.
-        dx = min(abs(self.calc_x - other.calc_x), self.world.width - abs(self.calc_x - other.calc_x))
-        dy = min(abs(self.calc_y - other.calc_y), self.world.height - abs(self.calc_y - other.calc_y))
+        dx = min(abs(self.x - other.x), WORLD_WIDTH - abs(self.x - other.x))
+        dy = min(abs(self.y - other.y), WORLD_HEIGHT - abs(self.y - other.y))
         
         return dx**2 + dy**2  
 
 
 class Food(Object):
-    def __init__(self, world, object_ID, x, y, contained_energy, horizontal_offset
-                 , vertical_offset, screen):
+    def __init__(self, world, object_ID, x, y, contained_energy):
         self.world = world
         self.object_ID = object_ID
         self.x = x
         self.y = y
         self.energy = contained_energy
-        self.horizontal_offset = horizontal_offset
-        self.vertical_offset = vertical_offset
-        self.screen = screen
-        self.food_image = pygame.image.load('small_food_bush.png').convert_alpha()
-        self.calc_x = self.x + self.horizontal_offset
-        self.calc_y = self.y + self.vertical_offset
-        
-    def show(self):
-        screen.blit(self.food_image, (self.x, self.y))
-        #self.representation = sphere(pos = (self.x, 0.75, self.y),
-                 #                    radius = 0.5, color = FOOD_COLOUR)
-
-    def kill(self):
-        pass
-        #self.representation.visible = False
+        self.food_image = get_food_image()
     
-    def update(self):
-        self.screen.blit(self.food_image, (self.x, self.y))
+    def render(self, screen):
+        screen.blit(self.food_image, (self.x - FOOD_CENTER, self.y - FOOD_CENTER))
 
 
 class Critter(Object):
         def __init__(self, world, object_ID, x, y, direction, 
-                     screen, counter_offset, horizontal_offset,
-                     vertical_offset, 
-                     img_south1, img_south2, 
-                     img_north1, img_north2, 
-                     img_east1, img_east2,
-                     img_west1, img_west2):
+                     counter_offset, images):
+            
             self.world = world
             self.object_ID = object_ID
             self.x = x
             self.y = y
             self.direction = direction
             self.energy = INITIAL_ENERGY
-            self.iteration_counter = counter_offset
-            self.horizontal_offset = horizontal_offset
-            self.vertical_offset = vertical_offset
             self.agent = Agent()
-            self.img_south1 = img_south1
-            self.img_south2 = img_south2
-            self.img_north1 = img_north1
-            self.img_north2 = img_north2
-            self.img_east1 = img_east1
-            self.img_east2 = img_east2
-            self.img_west1 = img_west1
-            self.img_west2 = img_west2
+            
+            self.images = images
+            
             # counter to know when to change the animation
             # given offset so that critters do not move in 
-            # unison. 
-            self.calc_x = self.x + self.horizontal_offset
-            self.calc_y = self.y + self.vertical_offset
-            
-
-        def show(self):
-            pass
-            #self.representation = cone(pos = (self.x, 0.75, self.y),
-             #   axis = (1, 0, 0), radius = 0.5, color = CRITTER_COLOUR)
-
-        def kill(self):
-            pass
-            #self.representation.visible = False
+            # unison.
+            self.iteration_counter = counter_offset
         
         def update(self):
             # Find all objects close enough to be visible to the agent;
             # tag each along with its delta-x and delta-y values relative
             # to this object
-            self.calc_x = self.x + self.horizontal_offset
-            self.calc_y = self.y + self.vertical_offset
             visible_objects = []
             for obj in self.world.objects:
                 if obj != self:
@@ -241,22 +224,22 @@ class Critter(Object):
                     # Example: width=100, self.x=40, obj.x=80. Then
                     # dxDirect = +40 (40 units from left to right)
                     # and dxAround = -60 (60 units from right to left)
-                    dxDirect = obj.calc_x - self.calc_x
-                    if obj.calc_x >= self.calc_x:
-                        dxAround = dxDirect - self.world.width
+                    dxDirect = obj.x - self.x
+                    if obj.x >= self.x:
+                        dxAround = dxDirect - WORLD_WIDTH
                     else:
-                        dxAround = dxDirect + self.world.width
+                        dxAround = dxDirect + WORLD_WIDTH
 
                     # Take the shorter one, i.e. the one with smaller
                     # absolute value
                     dx = min((dxDirect, dxAround), key = abs)
 
                     # And the same with the y values
-                    dyDirect = obj.calc_y - self.calc_y
-                    if obj.calc_y >= self.calc_y:
-                        dyAround = dyDirect - self.world.height
+                    dyDirect = obj.y - self.y
+                    if obj.y >= self.y:
+                        dyAround = dyDirect - WORLD_HEIGHT
                     else:
-                        dyAround = dyDirect + self.world.height
+                        dyAround = dyDirect + WORLD_HEIGHT
                         
                     dy = min((dyDirect, dyAround), key = abs)
 
@@ -272,58 +255,22 @@ class Critter(Object):
             self.direction += turn_angle
             self.direction %= 2*pi
             self.x += cos(self.direction) * move_distance
-            # minus sign because (0, 0) is top left
-            self.y += -sin(self.direction) * move_distance
+            self.y += sin(self.direction) * move_distance
 
             # Wrap around
-            while self.x < 0: self.x += self.world.width
-            while self.x >= self.world.width: self.x -= self.world.width
-            while self.y < 0: self.y += self.world.height
-            while self.y >= self.world.height: self.y -= self.world.height
+            while self.x < 0: self.x += WORLD_WIDTH
+            while self.x >= WORLD_WIDTH: self.x -= WORLD_WIDTH
+            while self.y < 0: self.y += WORLD_HEIGHT
+            while self.y >= WORLD_HEIGHT: self.y -= WORLD_HEIGHT
 
-            # Update representation
-            #self.representation.axis = rotate((1, 0, 0), self.direction, (0, -1, 0))
-            #self.representation.pos = (self.x, 0.75, self.y)
             self.direction %= 2*pi
-
-            #north direction
-            if self.direction > (5*pi)/4 and self.direction <= (7*pi)/4 :
-                if round((self.iteration_counter/ANIMATION_MOVE_INTERVAL))%2 ==  0:
-                   screen.blit(self.img_south1, (self.x, self.y))
-                else:
-                    screen.blit(self.img_south2, (self.x, self.y))
-            elif self.direction > pi/4 and self.direction <= (3*pi)/4 :
-                if round((self.iteration_counter/ANIMATION_MOVE_INTERVAL))%2 ==  0:
-                    screen.blit(self.img_north1, (self.x, self.y))
-                else:
-                    screen.blit(self.img_north2, (self.x, self.y))
-            elif self.direction > (3*pi)/4 and self.direction <= (5*pi)/4 :
-                if round((self.iteration_counter/ANIMATION_MOVE_INTERVAL))%2 ==  0:
-                    screen.blit(self.img_west1, (self.x, self.y))
-                else:
-                    screen.blit(self.img_west2, (self.x, self.y))
-            elif self.direction > (7*pi)/4 or self.direction <= pi/4 :
-                if round((self.iteration_counter/ANIMATION_MOVE_INTERVAL))%2 ==  0:
-                    screen.blit(self.img_east1, (self.x, self.y))
-                else:
-                    screen.blit(self.img_east2, (self.x, self.y))
-                
 
             # Reproduce
             if reproduce:
-                boy_south1 = pygame.image.load('boy_south_walk1.png').convert()
-                boy_south2 = pygame.image.load('boy_south_walk2.png').convert()
-                boy_north1 = pygame.image.load('boy_north_walk1.png').convert()
-                boy_north2 = pygame.image.load('boy_north_walk2.png').convert()
-                boy_east1 = pygame.image.load('boy_east_walk1.png').convert()
-                boy_east2 = pygame.image.load('boy_east_walk2.png').convert()
-                boy_west1 = pygame.image.load('boy_west_walk1.png').convert()
-                boy_west2 = pygame.image.load('boy_west_walk2.png').convert()
                 child = Critter(self.world, 0,
                                 self.x, self.y, 
-                             self.direction + pi, screen, 0, CRITTER_HORIZONTAL_CENTER, CRITTER_VERTICAL_CENTER,
-                            boy_south1, boy_south2, boy_north1, boy_north2, 
-                            boy_east1, boy_east2, boy_west1, boy_west2)
+                                self.direction + pi, 0,
+                                get_images())
                 self.world.add(child)
                 self.energy -= REPRODUCTION_COST
 
@@ -334,14 +281,22 @@ class Critter(Object):
                         self.world.delete(obj)
                         self.energy += obj.energy
 
-            #Energy decay + death
+            # Energy decay + death
             self.energy -= CRITTER_ENERGY_DECAY_RATE
             if self.energy <= 0:
                 self.world.delete(self)
                 
             # update the counter
             self.iteration_counter += 1
+
+        def render(self, screen):
             
+            direction_quadrant = int(((self.direction + pi/4)%(2*pi))/(pi/2))
+            animation_frame = int(self.iteration_counter/ANIMATION_FRAME_INTERVAL) \
+                                  % len(self.images[direction_quadrant])
+
+            screen.blit(self.images[direction_quadrant][animation_frame],
+                        (self.x - CRITTER_HORIZONTAL_CENTER, self.y - CRITTER_VERTICAL_CENTER))
 
 class Agent(object):
     def __init__(self):
@@ -372,7 +327,7 @@ class Agent(object):
             (closest_food_dx, closest_food_dy) = min(visible_food_positions,
                                                      key = lambda (dx, dy): dx**2 + dy**2)
             
-            angle = atan2(-closest_food_dy, closest_food_dx)
+            angle = atan2(closest_food_dy, closest_food_dx)
             return (angle - critter.direction, CRITTER_MAX_MOVE_SPEED, False)
         else:
             reproduce = False
@@ -386,8 +341,7 @@ class Agent(object):
             return (turn_angle, CRITTER_MAX_MOVE_SPEED, reproduce)
             
 
-if __name__ == "__main__": 
-    pygame.init()    
-    
-    screen = pygame.display.set_mode((640, 640))   
-    World(640, 640, screen).run()
+if __name__ == '__main__':
+    pygame.init()
+    screen = pygame.display.set_mode((WORLD_WIDTH, WORLD_HEIGHT))
+    World(screen).run()
