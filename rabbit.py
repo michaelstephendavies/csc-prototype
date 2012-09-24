@@ -87,9 +87,9 @@ class World(object):
         
         # (0, 0) in the simulation model maps to the top-left corner,
         # positive y is down. Directions are given with positive being clockwise.
-        self.objects = []
         self.screen = screen
         
+        self.objects = []           
         for i in xrange(10):
             self.objects.append(Critter(self, len(self.objects),
                 random.random()*WORLD_WIDTH, random.random()*WORLD_HEIGHT, 0, 
