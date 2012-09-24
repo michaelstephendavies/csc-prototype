@@ -70,6 +70,9 @@ def get_images():
 
 food_image = None
 
+background_image = None
+
+
 def get_food_image():
     global food_image
 
@@ -77,6 +80,14 @@ def get_food_image():
         food_image = pygame.image.load('small_food_bush.png').convert_alpha()
 
     return food_image
+
+def get_background_image():
+    global background_image
+
+    if background_image == None:
+        background_image = pygame.image.load('tile_grass.png').convert()
+
+    return background_image
 
 class World(object):
     def __init__(self, screen):
@@ -108,7 +119,8 @@ class World(object):
     
     def run(self):
         counter = 0
-        background = pygame.image.load('tile_grass.png').convert()
+        
+        background = get_background_image()
         
         while True:
             clock = pygame.time.Clock()
