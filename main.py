@@ -7,6 +7,9 @@ from math import *
 import random
 random.seed()
 
+#imports from our own files
+from agent import *
+
 INITIAL_ENERGY = 100
 REPRODUCTION_ENERGY_THRESHOLD = 130
 REPRODUCTION_COST = 30
@@ -135,7 +138,7 @@ class World(object):
                     self.screen.blit(background, (x, y))
                     
             # Iterate over a copy of the object list since modifying a list
-            # while iterating over it is problematic
+            # while iterating over it is verboten
             for obj in self.objects:
                 obj.update()
             
@@ -189,7 +192,9 @@ class Object(object):
         dy = min(abs(self.y - other.y), WORLD_HEIGHT - abs(self.y - other.y))
         
         return dx**2 + dy**2  
-
+    
+    def get_type(self):
+        raise NotImplementedError("Override in your subclass")
 
 class Food(Object):
     def __init__(self, world, object_ID, x, y, contained_energy):
@@ -202,22 +207,22 @@ class Food(Object):
     
     def render(self, screen):
         screen.blit(self.food_image, (self.x - FOOD_CENTER, self.y - FOOD_CENTER))
+        
+    def get_type(self):
+        return "Food"
 
 
 class Critter(Object):
         def __init__(self, world, object_ID, x, y, direction, 
-                     counter_offset, images):
-            
+                     counter_offset, images):            
             self.world = world
             self.object_ID = object_ID
             self.x = x
             self.y = y
             self.direction = direction
             self.energy = INITIAL_ENERGY
-            self.agent = Agent()
-            
-            self.images = images
-            
+            self.agent = Agent()           
+            self.images = images 
             # counter to know when to change the animation
             # given offset so that critters do not move in 
             # unison.
@@ -245,7 +250,6 @@ class Critter(Object):
                     # Take the shorter one, i.e. the one with smaller
                     # absolute value
                     dx = min((dxDirect, dxAround), key = abs)
-
                     # And the same with the y values
                     dyDirect = obj.y - self.y
                     if obj.y >= self.y:
@@ -301,57 +305,16 @@ class Critter(Object):
             # update the counter
             self.iteration_counter += 1
 
-        def render(self, screen):
-            
+        def render(self, screen):          
             direction_quadrant = int(((self.direction + pi/4)%(2*pi))/(pi/2))
             animation_frame = int(self.iteration_counter/ANIMATION_FRAME_INTERVAL) \
                                   % len(self.images[direction_quadrant])
 
             screen.blit(self.images[direction_quadrant][animation_frame],
                         (self.x - CRITTER_HORIZONTAL_CENTER, self.y - CRITTER_VERTICAL_CENTER))
-
-class Agent(object):
-    def __init__(self):
-        self.clock = 0
-
-    def compute_next_action(self, critter, visible_objects):
-        """ Given the current state of the critter and a list of visible
-        objects, returns the next set of actions for this agent's critter.
-
-        critter is just the Critter instance
-        visible_objects is a list of triples (obj, dx, dy) where:
-        * obj is an Object instance
-        * dx is the "delta-x" of the object relative to the critter
-        * dy is the "delta-y" of the object relative to the critter
-        Note that dx and dy have already taken into account the fact
-        that the world wraps around.
-        
-        Returns a tuple (turn_angle, move_distance, reproduce)
-        where reproduce is a boolean, which tells the given critter
-        what to do. """
-
-        self.clock += 1
-        
-        visible_food_positions = [(dx, dy) for (obj, dx, dy) in visible_objects
-                                  if isinstance(obj, Food)]
-        
-        if visible_food_positions != []:
-            (closest_food_dx, closest_food_dy) = min(visible_food_positions,
-                                                     key = lambda (dx, dy): dx**2 + dy**2)
             
-            angle = atan2(closest_food_dy, closest_food_dx)
-            return (angle - critter.direction, CRITTER_MAX_MOVE_SPEED, False)
-        else:
-            reproduce = False
-            if critter.energy > REPRODUCTION_ENERGY_THRESHOLD:
-                if self.clock > REPRODUCTION_PERIOD:
-                    reproduce = True
-                    self.clock = 0
-            turn_angle = 0
-            if random.randint(0, FRAMERATE*MEAN_TURN_INTERVAL) == 5:
-                turn_angle = (random.randint(0, 4)*pi)/2
-            return (turn_angle, CRITTER_MAX_MOVE_SPEED, reproduce)
-            
+        def get_type(self):
+            return "Critter"
 
 if __name__ == '__main__':
     pygame.init()
