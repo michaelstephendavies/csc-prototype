@@ -12,32 +12,75 @@ from images import *
 from objects import *
 
 class Config:
+
+    # Map from setting name to a string parsing function
+    setting_dict = {
+        "initial_energy": float,
+        "reproduction_energy_threshold": float,
+        "reproduction_cost": float,
+        "critter_energy_decay_rate": float,
+        "food_spawn_period": int,
+        "food_energy": int,
+        "critter_view_distance": float,
+        "critter_max_move_speed": float,
+        "reproduction_period": float,
+        "collision_radius": float,
+        "mean_turn_interval": float,
+        "world_width": int,
+        "world_height": int,
+        "tile_size": int,
+        "framerate": int,
+        "animation_frame_interval": int,
+        "critter_vertical_center": int,
+        "critter_horizontal_center": int,
+        "food_center": int
+    }
+    
     def __init__(self, filename):
-        conf_file = open(filename)
-        lines = conf_file.readlines()
-        self.initial_energy = float(lines[0].split()[2])
-        self.reproduction_energy_threshold = float(lines[1].split()[2])
-        self.reproduction_cost = float(lines[2].split()[2])
-        self.critter_energy_decay_rate = float(lines[3].split()[2])
-        self.food_spawn_period = float(lines[4].split()[2])
-        self.food_energy = float(lines[5].split()[2])
-        self.critter_view_distance = float(lines[6].split()[2])
-        self.critter_view_distance_sq = self.critter_view_distance**2
-        self.critter_max_move_speed = float(lines[7].split()[2])
-        self.reproduction_period = float(lines[8].split()[2])
-        self.collision_radius = float(lines[9].split()[2])
-        self.collision_radius_sq = self.collision_radius**2
-        self.mean_turn_interval = float(lines[10].split()[2])
-        self.world_width = int(lines[11].split()[2])
-        self.world_height = int(lines[12].split()[2])
-        self.tile_size = int(lines[13].split()[2])
-        self.framerate = int(lines[14].split()[2])
-        self.animation_frame_interval = int(lines[15].split()[2])
-        self.critter_vertical_center = int(lines[16].split()[2])
-        self.critter_horizontal_center = int(lines[17].split()[2])
-        self.food_center = int(lines[18].split()[2])
+        self.settings = {}
+        errors = []
+        
+        with open(filename) as conf_file:
+            for line in conf_file.readlines():
+                line = line.strip()
+                if (not line.startswith("#")) and line != "":
+                    (key, value) = line.split("=")
+                    key = key.strip()
+                    value = value.strip()
+                    try:
+                        parse_function = Config.setting_dict[key]
+                        try:
+                            self.settings[key] = parse_function(value)
+                        except:
+                            # parse_function threw an exception
+                            errors.append("Invalid value for '{0}': {1}".format(key, value))
+                            
+                    except KeyError:
+                        errors.append("Unknown config setting: {0}".format(key))
+
+        for setting in Config.setting_dict.iterkeys():
+            if setting not in self.settings:
+                errors.append("Missing config setting: {0}".format(setting))
+
+        if errors != []:
+            raise ConfigParseException("\n".join(errors))
+                
+        self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
+        self.collision_radius_sq = self.settings["collision_radius"]**2
+
+    def __getitem__(self, name):
+        # Operator overload for "config[name]"
+        return self.settings[name]
     
+    def __getattr__(self, name):
+        # Called when an attribute of a Config object is found, but Python
+        # can't find it normally. Instead we return the correct config value.
+        return self.settings[name]
+
     
+class ConfigParseException(Exception):
+    pass
+
 
 class World(object):
     def __init__(self, screen, config):
