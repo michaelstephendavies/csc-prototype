@@ -1,31 +1,6 @@
 from images import *
 from agent import *
 
-#fix this later
-INITIAL_ENERGY = 100
-REPRODUCTION_ENERGY_THRESHOLD = 130
-REPRODUCTION_COST = 30
-CRITTER_ENERGY_DECAY_RATE = 0.2
-FOOD_SPAWN_PERIOD = 50
-FOOD_ENERGY = 50
-CRITTER_VIEW_DISTANCE = 100
-CRITTER_VIEW_DISTANCE_SQ = CRITTER_VIEW_DISTANCE**2
-CRITTER_MAX_MOVE_SPEED = 0.5
-REPRODUCTION_PERIOD = 120
-COLLISION_RADIUS = 10
-COLLISION_RADIUS_SQ = COLLISION_RADIUS**2
-MEAN_TURN_INTERVAL = 10
-
-WORLD_WIDTH = 640
-WORLD_HEIGHT = 640
-TILE_SIZE = 64
-
-FRAMERATE = 50
-ANIMATION_FRAME_INTERVAL = 8
-CRITTER_VERTICAL_CENTER = 48
-CRITTER_HORIZONTAL_CENTER = 16
-FOOD_CENTER = 8
-
 class Object(object):
     """ Abstract base class for simulation objects.
     
@@ -61,8 +36,8 @@ class Object(object):
         # world in the normal way, or wrapping around the left/right edge).
         # Then we do the same for the y, then use these in the Euclidean
         # distance formula.
-        dx = min(abs(self.x - other.x), WORLD_WIDTH - abs(self.x - other.x))
-        dy = min(abs(self.y - other.y), WORLD_HEIGHT - abs(self.y - other.y))
+        dx = min(abs(self.x - other.x), self.config.world_width - abs(self.x - other.x))
+        dy = min(abs(self.y - other.y), self.config.world_height - abs(self.y - other.y))
         
         return dx**2 + dy**2  
     
@@ -70,7 +45,8 @@ class Object(object):
         raise NotImplementedError("Override in your subclass")
 
 class Food(Object):
-    def __init__(self, world, object_ID, x, y, contained_energy):
+    def __init__(self, config, world, object_ID, x, y, contained_energy):
+        self.config = config
         self.world = world
         self.object_ID = object_ID
         self.x = x
@@ -79,22 +55,23 @@ class Food(Object):
         self.food_image = get_food_image()
     
     def render(self, screen):
-        screen.blit(self.food_image, (self.x - FOOD_CENTER, self.y - FOOD_CENTER))
+        screen.blit(self.food_image, (self.x - self.config.food_center, self.y - self.config.food_center))
         
     def get_type(self):
         return "Food"
 
 
 class Critter(Object):
-        def __init__(self, world, object_ID, x, y, direction, 
-                     counter_offset, images):            
+        def __init__(self, config, world, object_ID, x, y, direction, 
+                     counter_offset, images):     
+            self.config = config       
             self.world = world
             self.object_ID = object_ID
             self.x = x
             self.y = y
             self.direction = direction
-            self.energy = INITIAL_ENERGY
-            self.agent = Agent()           
+            self.energy = self.config.initial_energy
+            self.agent = Agent(self.config)           
             self.images = images 
             # counter to know when to change the animation
             # given offset so that critters do not move in 
@@ -116,9 +93,9 @@ class Critter(Object):
                     # and dxAround = -60 (60 units from right to left)
                     dxDirect = obj.x - self.x
                     if obj.x >= self.x:
-                        dxAround = dxDirect - WORLD_WIDTH
+                        dxAround = dxDirect - self.config.world_width
                     else:
-                        dxAround = dxDirect + WORLD_WIDTH
+                        dxAround = dxDirect + self.config.world_width
 
                     # Take the shorter one, i.e. the one with smaller
                     # absolute value
@@ -126,13 +103,13 @@ class Critter(Object):
                     # And the same with the y values
                     dyDirect = obj.y - self.y
                     if obj.y >= self.y:
-                        dyAround = dyDirect - WORLD_HEIGHT
+                        dyAround = dyDirect - self.config.world_height
                     else:
-                        dyAround = dyDirect + WORLD_HEIGHT
+                        dyAround = dyDirect + self.config.world_height
                         
                     dy = min((dyDirect, dyAround), key = abs)
 
-                    if dx**2 + dy**2 < CRITTER_VIEW_DISTANCE_SQ:
+                    if dx**2 + dy**2 < self.config.critter_view_distance_sq:
                         visible_objects.append((obj, dx, dy))
 
             # Ask the agent what to do
@@ -140,38 +117,38 @@ class Critter(Object):
                 self.agent.compute_next_action(self, visible_objects)
 
             # Move
-            if move_distance > CRITTER_MAX_MOVE_SPEED: move_distance = CRITTER_MAX_MOVE_SPEED
+            if move_distance > self.config.critter_max_move_speed: move_distance = self.config.critter_max_move_speed
             self.direction += turn_angle
             self.direction %= 2*pi
             self.x += cos(self.direction) * move_distance
             self.y += sin(self.direction) * move_distance
 
             # Wrap around
-            while self.x < 0: self.x += WORLD_WIDTH
-            while self.x >= WORLD_WIDTH: self.x -= WORLD_WIDTH
-            while self.y < 0: self.y += WORLD_HEIGHT
-            while self.y >= WORLD_HEIGHT: self.y -= WORLD_HEIGHT
+            while self.x < 0: self.x += self.config.world_width
+            while self.x >= self.config.world_width: self.x -= self.config.world_width
+            while self.y < 0: self.y += self.config.world_height
+            while self.y >= self.config.world_height: self.y -= self.config.world_height
 
             self.direction %= 2*pi
 
             # Reproduce
             if reproduce:
-                child = Critter(self.world, 0,
+                child = Critter(self.config, self.world, 0,
                                 self.x, self.y, 
                                 self.direction + pi, 0,
                                 get_images())
                 self.world.add(child)
-                self.energy -= REPRODUCTION_COST
+                self.energy -= self.config.reproduction_cost
 
             # Eat food
             for obj in self.world.objects:
                 if isinstance(obj, Food):
-                    if self.distance_sq(obj) < COLLISION_RADIUS_SQ:
+                    if self.distance_sq(obj) < self.config.collision_radius_sq:
                         self.world.delete(obj)
                         self.energy += obj.energy
 
             # Energy decay + death
-            self.energy -= CRITTER_ENERGY_DECAY_RATE
+            self.energy -= self.config.critter_energy_decay_rate
             if self.energy <= 0:
                 self.world.delete(self)
                 
@@ -180,11 +157,11 @@ class Critter(Object):
 
         def render(self, screen):          
             direction_quadrant = int(((self.direction + pi/4)%(2*pi))/(pi/2))
-            animation_frame = int(self.iteration_counter/ANIMATION_FRAME_INTERVAL) \
+            animation_frame = int(self.iteration_counter/self.config.animation_frame_interval) \
                                   % len(self.images[direction_quadrant])
 
             screen.blit(self.images[direction_quadrant][animation_frame],
-                        (self.x - CRITTER_HORIZONTAL_CENTER, self.y - CRITTER_VERTICAL_CENTER))
+                        (self.x - self.config.critter_horizontal_center, self.y - self.config.critter_vertical_center))
             
         def get_type(self):
             return "Critter"

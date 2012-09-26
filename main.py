@@ -11,34 +11,36 @@ random.seed()
 from images import *
 from objects import *
 
-INITIAL_ENERGY = 100
-REPRODUCTION_ENERGY_THRESHOLD = 130
-REPRODUCTION_COST = 30
-CRITTER_ENERGY_DECAY_RATE = 0.2
-FOOD_SPAWN_PERIOD = 50
-FOOD_ENERGY = 50
-CRITTER_VIEW_DISTANCE = 100
-CRITTER_VIEW_DISTANCE_SQ = CRITTER_VIEW_DISTANCE**2
-CRITTER_MAX_MOVE_SPEED = 0.5
-REPRODUCTION_PERIOD = 120
-COLLISION_RADIUS = 10
-COLLISION_RADIUS_SQ = COLLISION_RADIUS**2
-MEAN_TURN_INTERVAL = 10
-
-WORLD_WIDTH = 640
-WORLD_HEIGHT = 640
-TILE_SIZE = 64
-
-FRAMERATE = 50
-ANIMATION_FRAME_INTERVAL = 8
-CRITTER_VERTICAL_CENTER = 48
-CRITTER_HORIZONTAL_CENTER = 16
-FOOD_CENTER = 8
-
-
+class Config:
+    def __init__(self, filename):
+        conf_file = open(filename)
+        lines = conf_file.readlines()
+        self.initial_energy = float(lines[0].split()[2])
+        self.reproduction_energy_threshold = float(lines[1].split()[2])
+        self.reproduction_cost = float(lines[2].split()[2])
+        self.critter_energy_decay_rate = float(lines[3].split()[2])
+        self.food_spawn_period = float(lines[4].split()[2])
+        self.food_energy = float(lines[5].split()[2])
+        self.critter_view_distance = float(lines[6].split()[2])
+        self.critter_view_distance_sq = self.critter_view_distance**2
+        self.critter_max_move_speed = float(lines[7].split()[2])
+        self.reproduction_period = float(lines[8].split()[2])
+        self.collision_radius = float(lines[9].split()[2])
+        self.collision_radius_sq = self.collision_radius**2
+        self.mean_turn_interval = float(lines[10].split()[2])
+        self.world_width = int(lines[11].split()[2])
+        self.world_height = int(lines[12].split()[2])
+        self.tile_size = int(lines[13].split()[2])
+        self.framerate = int(lines[14].split()[2])
+        self.animation_frame_interval = int(lines[15].split()[2])
+        self.critter_vertical_center = int(lines[16].split()[2])
+        self.critter_horizontal_center = int(lines[17].split()[2])
+        self.food_center = int(lines[18].split()[2])
+    
+    
 
 class World(object):
-    def __init__(self, screen):
+    def __init__(self, screen, config):
         
         # The simulation model has a toroidal topology (x and y co-ordinates
         # "wrap around"); we keep all x values in [0, width) and y values in
@@ -47,16 +49,18 @@ class World(object):
         # (0, 0) in the simulation model maps to the top-left corner,
         # positive y is down. Directions are given with positive being clockwise.
         self.screen = screen
+        self.config = config
         
         self.objects = []           
         for i in xrange(10):
-            self.objects.append(Critter(self, len(self.objects),
-                random.random()*WORLD_WIDTH, random.random()*WORLD_HEIGHT, 0, 
+            self.objects.append(Critter(config, self, len(self.objects),
+                random.random()*self.config.world_width, random.random()
+                    *self.config.world_height, 0, 
                             0, get_images())) # TODO: random counter_offset
             
         for i in xrange(10):
-            self.objects.append(Food(self, len(self.objects), random.random()*WORLD_WIDTH,
-                random.random()*WORLD_HEIGHT, FOOD_ENERGY))
+            self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
+                random.random()*self.config.world_height, self.config.food_energy))
     
     def delete(self, obj):
         obj.kill()        
@@ -72,14 +76,14 @@ class World(object):
         
         while True:
             clock = pygame.time.Clock()
-            clock.tick(FRAMERATE)
+            clock.tick(self.config.framerate)
             
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
                 
-            for x in xrange(0, WORLD_WIDTH, TILE_SIZE):
-                for y in xrange(0, WORLD_HEIGHT, TILE_SIZE):
+            for x in xrange(0, self.config.world_width, self.config.tile_size):
+                for y in xrange(0, self.config.world_height, self.config.tile_size):
                     self.screen.blit(background, (x, y))
                     
             # Iterate over a copy of the object list since modifying a list
@@ -87,9 +91,9 @@ class World(object):
             for obj in self.objects:
                 obj.update()
             
-            if counter % FOOD_SPAWN_PERIOD == 0:
-                self.add(Food(self, 0, random.random()*WORLD_WIDTH,
-                              random.random()*WORLD_HEIGHT, FOOD_ENERGY))
+            if counter % self.config.food_spawn_period == 0:
+                self.add(Food(config, self, 0, random.random()*self.config.world_width,
+                              random.random()*self.config.world_height, self.config.food_energy))
 
             for obj in self.objects:
                 obj.render(self.screen)
@@ -99,6 +103,7 @@ class World(object):
             counter += 1    
 
 if __name__ == '__main__':
+    config = Config(sys.argv[1])
     pygame.init()
-    screen = pygame.display.set_mode((WORLD_WIDTH, WORLD_HEIGHT))
-    World(screen).run()
+    screen = pygame.display.set_mode((config.world_width, config.world_height))
+    World(screen, config).run()
