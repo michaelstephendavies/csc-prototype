@@ -42,7 +42,13 @@ class Object(object):
         return dx**2 + dy**2  
     
     def get_type(self):
-        raise NotImplementedError("Override in your subclass")
+        """ Returns a string describing the type of the object
+        (e.g. "Critter" or "Food").
+        (Workaround for a Python bug with isinstance across multiple modules.)
+
+        Default behaviour is to return the class name; this may be overridden. """
+        return self.__class__.__name__
+
 
 class Food(Object):
     def __init__(self, config, world, object_ID, x, y, contained_energy):
@@ -63,7 +69,7 @@ class Food(Object):
 
 class Critter(Object):
         def __init__(self, config, world, object_ID, x, y, direction, 
-                     counter_offset, images):     
+                     counter_offset, images, parent1=None, parent2=None):     
             self.config = config       
             self.world = world
             self.object_ID = object_ID
@@ -71,7 +77,7 @@ class Critter(Object):
             self.y = y
             self.direction = direction
             self.energy = self.config.initial_energy
-            self.agent = Agent(self.config)           
+            self.agent = Agent(self.config, parent1, parent2)           
             self.images = images 
             # counter to know when to change the animation
             # given offset so that critters do not move in 
@@ -113,7 +119,7 @@ class Critter(Object):
                         visible_objects.append((obj, dx, dy))
 
             # Ask the agent what to do
-            (turn_angle, move_distance, reproduce) = \
+            (turn_angle, move_distance, reproduction_target) = \
                 self.agent.compute_next_action(self, visible_objects)
 
             # Move
@@ -132,13 +138,20 @@ class Critter(Object):
             self.direction %= 2*pi
 
             # Reproduce
-            if reproduce:
-                child = Critter(self.config, self.world, 0,
-                                self.x, self.y, 
-                                self.direction + pi, 0,
-                                get_images())
-                self.world.add(child)
-                self.energy -= self.config.reproduction_cost
+            if reproduction_target != None:
+                if self.distance_sq(reproduction_target) <= self.config.reproduction_radius_sq \
+                     and reproduction_target.get_type() == "Critter" \
+                     and self.energy > self.config.reproduction_cost \
+                     and reproduction_target != self:
+                    
+                    child = Critter(self.config, self.world, 0,
+                                    (self.x + reproduction_target.x)/2 % self.config.world_width,
+                                    (self.y + reproduction_target.y)/2 % self.config.world_height, 
+                                    self.direction + pi/2, 0,
+                                    get_images(),
+                                    self.agent, reproduction_target.agent)
+                    self.world.add(child)
+                    self.energy -= self.config.reproduction_cost
 
             # Eat food
             for obj in self.world.objects:

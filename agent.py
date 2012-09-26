@@ -3,7 +3,12 @@ import random
 from math import *
 
 class Agent(object):
-    def __init__(self, config):
+    def __init__(self, config, parent1, parent2):
+        """ Create an agent for a new critter.
+
+        If the new critter is one of the original critters, and hence has
+        no parents, then both parent1 and parent2 will be None.
+        Otherwise, they will be the agents of the two parents. """
         self.config = config
         self.clock = 0
 
@@ -19,27 +24,38 @@ class Agent(object):
         Note that dx and dy have already taken into account the fact
         that the world wraps around.
         
-        Returns a tuple (turn_angle, move_distance, reproduce)
-        where reproduce is a boolean, which tells the given critter
-        what to do. """
+        Returns a tuple (turn_angle, move_distance, reproduction_target)
+        where reproduction_target is either None (meaning "do not reproduce on
+        this frame") or another Critter (being the other critter to reproduce with). """
         self.clock += 1
-        
+
+        reproduction_target = None
+        if critter.energy > self.config.reproduction_energy_threshold \
+              and self.clock > self.config.reproduction_period:
+            
+            # Try to find another critter to reproduce with  
+            for (obj, dx, dy) in visible_objects:
+                if obj.get_type() == "Critter" \
+                     and dx**2 + dy**2 <= self.config.reproduction_radius_sq:
+                    
+                    reproduction_target = obj
+                    self.clock = 0
+                    break
+
+        # Look for food
         visible_food_positions = [(dx, dy) for (obj, dx, dy) in visible_objects
                                   if obj.get_type() == "Food"]
         
         if visible_food_positions != []:
+            # Move towards the closest food
             (closest_food_dx, closest_food_dy) = min(visible_food_positions,
                                                      key = lambda (dx, dy): dx**2 + dy**2)
             
             angle = atan2(closest_food_dy, closest_food_dx)
-            return (angle - critter.direction, self.config.critter_max_move_speed, False)
+            return (angle - critter.direction, self.config.critter_max_move_speed, reproduction_target)
         else:
-            reproduce = False
-            if critter.energy > self.config.reproduction_energy_threshold:
-                if self.clock > self.config.reproduction_period:
-                    reproduce = True
-                    self.clock = 0
+            # Can't see any food; walk around randomly
             turn_angle = 0
             if random.randint(0, self.config.framerate*self.config.mean_turn_interval) == 5:
                 turn_angle = (random.randint(0, 4)*pi)/2
-            return (turn_angle, self.config.critter_max_move_speed, reproduce)
+            return (turn_angle, self.config.critter_max_move_speed, reproduction_target)
