@@ -2,7 +2,7 @@ import pygame
 
 images = None
 
-def get_images():
+def get_man_images():
     # Returns list of lists where:
     #  first list is the animation frames for walking east
     #  second list is the animation frames for walking south
@@ -15,23 +15,23 @@ def get_images():
         images = [
             # east
             [
-                pygame.image.load('boy_east_walk1.png').convert(),
-                pygame.image.load('boy_east_walk2.png').convert()
+                pygame.image.load('man_east_walk1.png').convert(),
+                pygame.image.load('man_east_walk2.png').convert()
             ],
             # south
             [
-                pygame.image.load('boy_south_walk1.png').convert(),
-                pygame.image.load('boy_south_walk2.png').convert()
+                pygame.image.load('man_south_walk1.png').convert(),
+                pygame.image.load('man_south_walk2.png').convert()
             ],
             # west
             [
-                pygame.image.load('boy_west_walk1.png').convert(),
-                pygame.image.load('boy_west_walk2.png').convert()
+                pygame.image.load('man_west_walk1.png').convert(),
+                pygame.image.load('man_west_walk2.png').convert()
             ],
             # north
             [
-                pygame.image.load('boy_north_walk1.png').convert(),
-                pygame.image.load('boy_north_walk2.png').convert()
+                pygame.image.load('man_north_walk1.png').convert(),
+                pygame.image.load('man_north_walk2.png').convert()
             ],
         ]
         

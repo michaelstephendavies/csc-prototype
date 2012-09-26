@@ -56,7 +56,7 @@ class World(object):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, 0, 
-                            0, get_images())) # TODO: random counter_offset
+                            0, get_man_images())) # TODO: random counter_offset
             
         for i in xrange(10):
             self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
