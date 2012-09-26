@@ -35,12 +35,21 @@ class Config:
         "critter_horizontal_center": int,
         "food_center": int
     }
-    
-    def __init__(self, filename):
+        
+    tiles_dict = {
+                  "daisies" : "d",
+                  "hill" :  "h",
+                  "long_grass" : "l",
+                  "pit" : "p",
+                  "sand" : "s",
+                  "dirt" : "i",
+                  }   
+   
+    def __init__(self, conf_filename, spec_filename):
         self.settings = {}
         errors = []
         
-        with open(filename) as conf_file:
+        with open(conf_filename) as conf_file:
             for line in conf_file.readlines():
                 line = line.strip()
                 if (not line.startswith("#")) and line != "":
@@ -67,6 +76,20 @@ class Config:
                 
         self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
         self.collision_radius_sq = self.settings["collision_radius"]**2
+        
+        # the bit to do the world spec
+        spec_file = open(spec_filename)
+        first_line = spec_file.readline()
+        (rows, cols) = first_line.split()
+        self.rows = int(rows)
+        self.cols = int(cols)
+        # making a matrix of g's
+        self.tile_spec = [["g" for a in xrange(int(cols))] for b in xrange(int(rows))]
+        # adding in the other tiles
+        for line in spec_file:
+            (type, colon, x, y) = line.split()
+            letter = self.tiles_dict[type]
+            self.tile_spec[int(x)][int(y)] = letter     
 
     def __getitem__(self, name):
         # Operator overload for "config[name]"
@@ -76,7 +99,6 @@ class Config:
         # Called when an attribute of a Config object is found, but Python
         # can't find it normally. Instead we return the correct config value.
         return self.settings[name]
-
     
 class ConfigParseException(Exception):
     pass
@@ -115,8 +137,6 @@ class World(object):
     def run(self):
         counter = 0
         
-        background = get_background_image()
-        
         while True:
             clock = pygame.time.Clock()
             clock.tick(self.config.framerate)
@@ -124,10 +144,23 @@ class World(object):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
-                
-            for x in xrange(0, self.config.world_width, self.config.tile_size):
-                for y in xrange(0, self.config.world_height, self.config.tile_size):
-                    self.screen.blit(background, (x, y))
+            
+            tiles = {    
+            "g" : get_tile_grass(),
+            "d" : get_tile_daisies(),
+            "h" : get_tile_hill(),
+            "l" : get_tile_long_grass(),
+            "p" : get_tile_pit(),
+            "s" : get_tile_sand(),
+            "i" : get_tile_dirt()
+            }
+            for x in xrange(self.config.rows):
+                for y in xrange(self.config.cols):
+                       self.screen.blit(tiles[self.config.tile_spec[x][y]], 
+                                        (x*self.config.tile_size, y*self.config.tile_size)) 
+                    
+                    
+                    
                     
             # Iterate over a copy of the object list since modifying a list
             # while iterating over it is verboten
@@ -147,7 +180,7 @@ class World(object):
 
 if __name__ == '__main__':
     try:
-        config = Config(sys.argv[1])
+        config = Config(sys.argv[1], sys.argv[2])
     except ConfigParseException as ex:
         print ex
         sys.exit(1)

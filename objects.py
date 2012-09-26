@@ -136,7 +136,7 @@ class Critter(Object):
                 child = Critter(self.config, self.world, 0,
                                 self.x, self.y, 
                                 self.direction + pi, 0,
-                                get_images())
+                                get_man_images())
                 self.world.add(child)
                 self.energy -= self.config.reproduction_cost
 
