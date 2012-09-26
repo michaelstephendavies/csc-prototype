@@ -13,7 +13,7 @@ reproduction_period = 120
 collision_radius = 10
 mean_turn_interval = 10
 
-world_width = 320
+world_width = 640
 world_height = 640
 tile_size = 64
 framerate = 50

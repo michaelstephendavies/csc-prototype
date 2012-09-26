@@ -146,7 +146,12 @@ class World(object):
             counter += 1    
 
 if __name__ == '__main__':
-    config = Config(sys.argv[1])
+    try:
+        config = Config(sys.argv[1])
+    except ConfigParseException as ex:
+        print ex
+        sys.exit(1)
+        
     pygame.init()
     screen = pygame.display.set_mode((config.world_width, config.world_height))
     World(screen, config).run()
