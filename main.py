@@ -34,10 +34,12 @@ class Config:
         "animation_frame_interval": int,
         "critter_vertical_center": int,
         "critter_horizontal_center": int,
-        "food_center": int,
+        "food_horizontal_offset" : int,
+        "food_vertical_offset" : int, 
         "tree_horizontal_offset" : int,
         "tree_vertical_offset" : int,
-        "palm_vertical_offset" : int
+        "palm_vertical_offset" : int,
+        "ageing_interval" : int
     }
         
     tiles_dict = {
@@ -152,7 +154,7 @@ class World(object):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, 0, 
-                            0, get_man_images())) # TODO: random counter_offset
+                            0, self.config.ageing_interval, get_male_images())) # TODO: random counter_offset
             
         for i in xrange(10):
             self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
