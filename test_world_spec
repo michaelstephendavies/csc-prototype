@@ -20,3 +20,7 @@ sand : 1 9
 hill : 8 8
 hill : 2 2
 long_grass : 4 3
+palm : 400 300
+dead_tree : 300 500
+oak : 400 600
+pine : 100 350

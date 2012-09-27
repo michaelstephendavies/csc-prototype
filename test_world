@@ -22,3 +22,7 @@ animation_frame_interval = 8
 critter_vertical_center = 48
 critter_horizontal_center = 16
 food_center = 8
+
+tree_horizontal_offset = 32
+tree_vertical_offset = 64
+palm_vertical_offset = 96

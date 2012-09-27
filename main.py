@@ -34,7 +34,10 @@ class Config:
         "animation_frame_interval": int,
         "critter_vertical_center": int,
         "critter_horizontal_center": int,
-        "food_center": int
+        "food_center": int,
+        "tree_horizontal_offset" : int,
+        "tree_vertical_offset" : int,
+        "palm_vertical_offset" : int
     }
         
     tiles_dict = {
@@ -84,13 +87,19 @@ class Config:
         (rows, cols) = first_line.split()
         self.rows = int(rows)
         self.cols = int(cols)
+        # making something to hold info on
+        self.scenery = []                
         # making a matrix of g's
         self.tile_spec = [["g" for a in xrange(int(cols))] for b in xrange(int(rows))]
         # adding in the other tiles
         for line in spec_file:
             (type, colon, x, y) = line.split()
-            letter = self.tiles_dict[type]
-            self.tile_spec[int(x)][int(y)] = letter     
+            if type in self.tiles_dict:
+                letter = self.tiles_dict[type]
+                self.tile_spec[int(x)][int(y)] = letter   
+            else:
+                self.scenery.append([type, int(x), int(y)])
+                      
         self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
 
     def __getitem__(self, name):
@@ -118,7 +127,27 @@ class World(object):
         self.screen = screen
         self.config = config
         
-        self.objects = []           
+        self.objects = []
+        
+        # add scenery to objects
+        for item in self.config.scenery:
+            if item[0] == "palm":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_palm(), self.config.tree_horizontal_offset, 
+                                    self.config.palm_vertical_offset))
+            elif item[0] == "oak":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_oak(), self.config.tree_horizontal_offset, 
+                                    self.config.tree_vertical_offset))
+            elif item[0] == "dead_tree":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_dead_tree(), self.config.tree_horizontal_offset, 
+                                    self.config.tree_vertical_offset))
+            elif item[0] == "pine":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_pine(), self.config.tree_horizontal_offset, 
+                                    self.config.tree_vertical_offset))
+                   
         for i in xrange(10):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
@@ -145,7 +174,7 @@ class World(object):
             
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return
+                    return            
             
             tiles = {    
             "g" : get_tile_grass(),
@@ -156,6 +185,8 @@ class World(object):
             "s" : get_tile_sand(),
             "i" : get_tile_dirt()
             }
+            
+            
             for x in xrange(self.config.rows):
                 for y in xrange(self.config.cols):
                        self.screen.blit(tiles[self.config.tile_spec[x][y]], 
@@ -172,6 +203,8 @@ class World(object):
             if counter % self.config.food_spawn_period == 0:
                 self.add(Food(config, self, 0, random.random()*self.config.world_width,
                               random.random()*self.config.world_height, self.config.food_energy))
+                
+            self.objects.sort(key = lambda obj: obj.y)
 
             for obj in self.objects:
                 obj.render(self.screen)

@@ -232,6 +232,25 @@ class Food(Object):
         
     def get_type(self):
         return "Food"
+    
+class Scenery(Object):
+    def __init__(self, config, world, object_ID, x, y, image, 
+                    horizontal_offset, vertical_offset):
+        self.config = config
+        self.world = world
+        self.object_ID = object_ID
+        self.x = x
+        self.y = y
+        self.image = image
+        self.horizontal_offset = horizontal_offset
+        self.vertical_offset = vertical_offset
+    
+    def render(self, screen):
+        screen.blit(self.image, (self.x - self.horizontal_offset,
+                                 self.y - self.vertical_offset))
+        
+    def get_type(self):
+        return "Scenery"
 
 
 class Critter(Object):

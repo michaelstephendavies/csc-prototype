@@ -116,3 +116,44 @@ def get_tile_sand():
         tile_sand = pygame.image.load('tile_sand.png').convert()
 
     return tile_sand
+
+palm = None
+
+def get_palm():
+    global palm
+
+    if palm == None:
+        palm = pygame.image.load('palm.png').convert_alpha()
+
+    return palm
+
+pine = None
+
+def get_pine():
+    global pine
+
+    if pine == None:
+        pine = pygame.image.load('pine.png').convert_alpha()
+
+    return pine
+
+oak = None
+
+def get_oak():
+    global oak
+
+    if oak == None:
+        oak = pygame.image.load('oak.png').convert_alpha()
+
+    return oak
+
+dead_tree = None
+
+def get_dead_tree():
+    global dead_tree
+
+    if dead_tree == None:
+        dead_tree = pygame.image.load('dead_tree.png').convert_alpha()
+
+    return dead_tree
+
