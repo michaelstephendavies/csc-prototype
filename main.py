@@ -39,7 +39,9 @@ class Config:
         "tree_horizontal_offset" : int,
         "tree_vertical_offset" : int,
         "palm_vertical_offset" : int,
-        "ageing_interval" : int
+        "ageing_interval" : int,
+        "heart_time" : int,
+        "heart_offset" : int
     }
         
     tiles_dict = {

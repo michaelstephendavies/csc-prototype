@@ -225,3 +225,13 @@ def get_dead_tree():
 
     return dead_tree
 
+heart = None
+
+def get_heart():
+    global heart
+
+    if heart == None:
+        heart = pygame.image.load('images/heart2.png').convert_alpha()
+
+    return heart
+

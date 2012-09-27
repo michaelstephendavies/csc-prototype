@@ -74,11 +74,13 @@ class Critter(Object):
             self.energy = self.config.initial_energy
             self.agent = Agent(self.config)           
             self.images = images
+            self.heart_image = get_heart()
             # counter to know when to change the animation
             # given offset so that critters do not move in 
             # unison.
             self.iteration_counter = counter_offset
             self.age = age
+            self.heart_countdown = 0
         
         def update(self):
             # Find all objects close enough to be visible to the agent;
@@ -135,6 +137,8 @@ class Critter(Object):
 
             # Reproduce
             if reproduce:
+                self.heart_countdown = self.config.heart_time
+                reproduce.heart_countdown = self.config.heart_time
                 child = Critter(self.config, self.world, 0,
                                 self.x, self.y, 
                                 self.direction + pi, 0, 0,
@@ -156,8 +160,9 @@ class Critter(Object):
                 
             # update the counter
             self.iteration_counter += 1
-            # age once per second
+            # update these once per second
             if self.iteration_counter % self.config.framerate == 0 :
+                self.heart_countdown -= 1
                 self.age += 1
 
         def render(self, screen):          
@@ -167,7 +172,15 @@ class Critter(Object):
                                   % len(age_images[direction_quadrant])
 
             screen.blit(age_images[direction_quadrant][animation_frame],
-                        (self.x - self.config.critter_horizontal_center, self.y - self.config.critter_vertical_center))
+                        (self.x - self.config.critter_horizontal_center, 
+                         self.y - self.config.critter_vertical_center))
+            
+            if self.heart_countdown > 0:
+                screen.blit(self.heart_image,
+                        (self.x - self.config.critter_horizontal_center + self.config.heart_offset - 2, 
+                         self.y - self.config.critter_vertical_center 
+                         - self.config.heart_offset - 7))
+                
             
         def get_type(self):
             return "Critter"

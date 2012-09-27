@@ -29,3 +29,6 @@ tree_vertical_offset = 64
 palm_vertical_offset = 96
 
 ageing_interval = 15
+
+heart_time = 2
+heart_offset = 10
