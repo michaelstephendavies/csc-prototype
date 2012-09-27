@@ -25,7 +25,7 @@ class Agent(object):
         self.clock += 1
 
         reproduction_target = None
-        if critter.energy > self.config.reproduction_energy_threshold \
+        if critter.is_mature() and critter.energy > self.config.reproduction_energy_threshold \
               and self.clock > self.config.reproduction_period:
             
             # Try to find another critter to reproduce with  
@@ -33,8 +33,7 @@ class Agent(object):
                 if obj.get_type() == "Critter" \
                      and dx**2 + dy**2 <= self.config.reproduction_radius_sq \
                      and obj.gender != critter.gender \
-                     and floor(critter.age / self.config.ageing_interval) != 0 \
-                     and floor(obj.age / self.config.ageing_interval) != 0:
+                     and obf.is_mature():
                     
                     reproduction_target = obj
                     self.clock = 0

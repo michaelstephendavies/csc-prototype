@@ -138,7 +138,7 @@ class Critter(Object):
             self.direction %= 2*pi
 
             # Reproduce
-            if reproduce:
+            if reproduce  and self.is_mature() and reproduce.is_mature():
 				self.heart_countdown = self.config.heart_time
 				reproduce.heart_countdown = self.config.heart_time
 				if random.randint(0, 1) == 1:
@@ -190,7 +190,9 @@ class Critter(Object):
                          self.y - self.config.critter_vertical_center 
                          - self.config.heart_offset - 7))
                 
-            
+        def is_mature(self):
+            return self.age >= self.config.maturity_age
+        
         def get_type(self):
             return "Critter"
     

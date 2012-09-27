@@ -40,8 +40,10 @@ class Config:
         "tree_vertical_offset" : int,
         "palm_vertical_offset" : int,
         "ageing_interval" : int,
+        "maturity_age": int,
         "heart_time" : int,
-        "heart_offset" : int
+        "heart_offset" : int,
+        "random_seed" : float
     }
         
     tiles_dict = {
@@ -84,6 +86,8 @@ class Config:
                 
         self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
         self.collision_radius_sq = self.settings["collision_radius"]**2
+        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
+
         
         # the bit to do the world spec
         spec_file = open(spec_filename)
@@ -104,7 +108,6 @@ class Config:
             else:
                 self.scenery.append([type, int(x), int(y)])
                       
-        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
 
     def __getitem__(self, name):
         # Operator overload for "config[name]"
@@ -178,6 +181,16 @@ class World(object):
     def run(self):
         counter = 0
         
+        tiles = {    
+        "g" : get_tile_grass(),
+        "d" : get_tile_daisies(),
+        "h" : get_tile_hill(),
+        "l" : get_tile_long_grass(),
+        "p" : get_tile_pit(),
+        "s" : get_tile_sand(),
+        "i" : get_tile_dirt()
+            }
+
         while True:
             clock = pygame.time.Clock()
             clock.tick(self.config.framerate)
@@ -185,26 +198,12 @@ class World(object):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return            
-            
-            tiles = {    
-            "g" : get_tile_grass(),
-            "d" : get_tile_daisies(),
-            "h" : get_tile_hill(),
-            "l" : get_tile_long_grass(),
-            "p" : get_tile_pit(),
-            "s" : get_tile_sand(),
-            "i" : get_tile_dirt()
-            }
-            
-            
+
             for x in xrange(self.config.rows):
                 for y in xrange(self.config.cols):
                        self.screen.blit(tiles[self.config.tile_spec[x][y]], 
                                         (x*self.config.tile_size, y*self.config.tile_size)) 
-                    
-                    
-                    
-                    
+        
             # Iterate over a copy of the object list since modifying a list
             # while iterating over it is verboten
             for obj in self.objects[:]:
@@ -229,7 +228,12 @@ if __name__ == '__main__':
     except ConfigParseException as ex:
         print ex
         sys.exit(1)
-        
+
+    if config.random_seed == "":
+        random.seed() # using the OS-specific randomness source
+    else:
+        random.seed(hash(config.random_seed))
+    
     pygame.init()
     screen = pygame.display.set_mode((config.world_width, config.world_height))
     World(screen, config).run()
