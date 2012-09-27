@@ -43,7 +43,7 @@ def get_food_image():
     global food_image
 
     if food_image == None:
-        food_image = pygame.image.load('small_food_bush.png').convert_alpha()
+        food_image = pygame.image.load('goat.png').convert_alpha()
 
     return food_image
 
