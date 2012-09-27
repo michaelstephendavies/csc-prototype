@@ -33,7 +33,7 @@ class Agent(object):
                 if obj.get_type() == "Critter" \
                      and dx**2 + dy**2 <= self.config.reproduction_radius_sq \
                      and obj.gender != critter.gender \
-                     and obf.is_mature():
+                     and obj.is_mature():
                     
                     reproduction_target = obj
                     self.clock = 0

@@ -149,7 +149,7 @@ def get_female_images():
                 # south
                 [
                     pygame.image.load('images/teeng_south1.png').convert(),
-                    pygame.image.load('images/teen_south2.png').convert()
+                    pygame.image.load('images/teeng_south2.png').convert()
                 ],
                 # west
                 [
