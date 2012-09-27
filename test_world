@@ -1,6 +1,8 @@
 
 # This is a comment
 
+random_seed =
+
 initial_energy = 100
 reproduction_energy_threshold = 100
 reproduction_cost = 30

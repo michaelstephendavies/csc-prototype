@@ -15,6 +15,7 @@ class Config:
 
     # Map from setting name to a string parsing function
     setting_dict = {
+        "random_seed": str,
         "initial_energy": float,
         "reproduction_energy_threshold": float,
         "reproduction_cost": float,
@@ -44,15 +45,15 @@ class Config:
         "heart_time" : int,
         "heart_offset" : int
     }
-        
+    
     tiles_dict = {
-                  "daisies" : "d",
-                  "hill" :  "h",
-                  "long_grass" : "l",
-                  "pit" : "p",
-                  "sand" : "s",
-                  "dirt" : "i",
-                  }   
+        "daisies" : "d",
+        "hill" :  "h",
+        "long_grass" : "l",
+        "pit" : "p",
+        "sand" : "s",
+        "dirt" : "i",
+    }
    
     def __init__(self, conf_filename, spec_filename):
         self.settings = {}
@@ -85,6 +86,7 @@ class Config:
                 
         self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
         self.collision_radius_sq = self.settings["collision_radius"]**2
+        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
         
         # the bit to do the world spec
         spec_file = open(spec_filename)
@@ -104,8 +106,6 @@ class Config:
                 self.tile_spec[int(x)][int(y)] = letter   
             else:
                 self.scenery.append([type, int(x), int(y)])
-                      
-        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
 
     def __getitem__(self, name):
         # Operator overload for "config[name]"
@@ -158,7 +158,7 @@ class World(object):
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, 0, 
                             0, 2*self.config.ageing_interval, get_male_images())) # TODO: random counter_offset
-            
+        
         for i in xrange(10):
             self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
                 random.random()*self.config.world_height, self.config.food_energy))
@@ -172,6 +172,16 @@ class World(object):
     
     def run(self):
         counter = 0
+
+        tiles = {
+            "g" : get_tile_grass(),
+            "d" : get_tile_daisies(),
+            "h" : get_tile_hill(),
+            "l" : get_tile_long_grass(),
+            "p" : get_tile_pit(),
+            "s" : get_tile_sand(),
+            "i" : get_tile_dirt()
+        }
         
         while True:
             clock = pygame.time.Clock()
@@ -181,23 +191,10 @@ class World(object):
                 if event.type == QUIT:
                     return            
             
-            tiles = {    
-            "g" : get_tile_grass(),
-            "d" : get_tile_daisies(),
-            "h" : get_tile_hill(),
-            "l" : get_tile_long_grass(),
-            "p" : get_tile_pit(),
-            "s" : get_tile_sand(),
-            "i" : get_tile_dirt()
-            }
-            
-            
             for x in xrange(self.config.rows):
                 for y in xrange(self.config.cols):
                        self.screen.blit(tiles[self.config.tile_spec[x][y]], 
                                         (x*self.config.tile_size, y*self.config.tile_size)) 
-                    
-                    
                     
                     
             # Iterate over a copy of the object list since modifying a list
@@ -208,7 +205,7 @@ class World(object):
             if counter % self.config.food_spawn_period == 0:
                 self.add(Food(config, self, 0, random.random()*self.config.world_width,
                               random.random()*self.config.world_height, self.config.food_energy))
-                
+            
             self.objects.sort(key = lambda obj: obj.y)
 
             for obj in self.objects:
@@ -219,12 +216,18 @@ class World(object):
             counter += 1    
 
 if __name__ == '__main__':
+    
     try:
         config = Config(sys.argv[1], sys.argv[2])
     except ConfigParseException as ex:
         print ex
         sys.exit(1)
-        
+
+    if config.random_seed == "":
+        random.seed() # using the OS-specific randomness source
+    else:
+        random.seed(hash(config.random_seed))
+    
     pygame.init()
     screen = pygame.display.set_mode((config.world_width, config.world_height))
     World(screen, config).run()
