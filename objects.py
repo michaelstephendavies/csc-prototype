@@ -244,7 +244,7 @@ class Critter(Object):
             self.y = y
             self.direction = direction
             self.energy = self.config.initial_energy
-            self.agent = Agent(self.config, parent1, parent2)           
+            self.agent = Agent(self.config)           
             self.images = images 
             # counter to know when to change the animation
             # given offset so that critters do not move in 
@@ -315,7 +315,7 @@ class Critter(Object):
                                     (self.x + reproduction_target.x)/2 % self.config.world_width,
                                     (self.y + reproduction_target.y)/2 % self.config.world_height, 
                                     self.direction + pi/2, 0,
-                                    get_images(),
+                                    get_man_images(),
                                     self.agent, reproduction_target.agent)
                     self.world.add(child)
                     self.energy -= self.config.reproduction_cost
