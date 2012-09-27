@@ -40,6 +40,7 @@ class Config:
         "tree_vertical_offset" : int,
         "palm_vertical_offset" : int,
         "ageing_interval" : int,
+        "maturity_age": int,
         "heart_time" : int,
         "heart_offset" : int
     }

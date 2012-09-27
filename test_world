@@ -2,7 +2,7 @@
 # This is a comment
 
 initial_energy = 100
-reproduction_energy_threshold = 130
+reproduction_energy_threshold = 100
 reproduction_cost = 30
 critter_energy_decay_rate = 0.15
 food_spawn_period = 30
@@ -29,6 +29,7 @@ tree_vertical_offset = 64
 palm_vertical_offset = 96
 
 ageing_interval = 15
+maturity_age = 15
 
 heart_time = 2
 heart_offset = 10
