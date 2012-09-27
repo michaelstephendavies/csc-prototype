@@ -16,45 +16,89 @@ def get_male_images():
             [
                 # east
                 [
-                    pygame.image.load('images/boy_east_walk1.png').convert(),
-                    pygame.image.load('images/boy_east_walk2.png').convert()
+                    pygame.image.load('images/boy_east1.png').convert(),
+                    pygame.image.load('images/boy_east2.png').convert()
                 ],
                 # south
                 [
-                    pygame.image.load('images/boy_south_walk1.png').convert(),
-                    pygame.image.load('images/boy_south_walk2.png').convert()
+                    pygame.image.load('images/boy_south1.png').convert(),
+                    pygame.image.load('images/boy_south2.png').convert()
                 ],
                 # west
                 [
-                    pygame.image.load('images/boy_west_walk1.png').convert(),
-                    pygame.image.load('images/boy_west_walk2.png').convert()
+                    pygame.image.load('images/boy_west1.png').convert(),
+                    pygame.image.load('images/boy_west2.png').convert()
                 ],
                 # north
                 [
-                    pygame.image.load('images/boy_north_walk1.png').convert(),
-                    pygame.image.load('images/boy_north_walk2.png').convert()
+                    pygame.image.load('images/boy_north1.png').convert(),
+                    pygame.image.load('images/boy_north2.png').convert()
                 ]
             ],
             [
                 # east
                 [
-                    pygame.image.load('images/man_east_walk1.png').convert(),
-                    pygame.image.load('images/man_east_walk2.png').convert()
+                    pygame.image.load('images/teen_east1.png').convert(),
+                    pygame.image.load('images/teen_east2.png').convert()
                 ],
                 # south
                 [
-                    pygame.image.load('images/man_south_walk1.png').convert(),
-                    pygame.image.load('images/man_south_walk2.png').convert()
+                    pygame.image.load('images/teen_south1.png').convert(),
+                    pygame.image.load('images/teen_south2.png').convert()
                 ],
                 # west
                 [
-                    pygame.image.load('images/man_west_walk1.png').convert(),
-                    pygame.image.load('images/man_west_walk2.png').convert()
+                    pygame.image.load('images/teen_west1.png').convert(),
+                    pygame.image.load('images/teen_west2.png').convert()
                 ],
                 # north
                 [
-                    pygame.image.load('images/man_north_walk1.png').convert(),
-                    pygame.image.load('images/man_north_walk2.png').convert()
+                    pygame.image.load('images/teen_north1.png').convert(),
+                    pygame.image.load('images/teen_north2.png').convert()
+                ]
+            ],
+            [
+                # east
+                [
+                    pygame.image.load('images/man_east1.png').convert(),
+                    pygame.image.load('images/man_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/man_south1.png').convert(),
+                    pygame.image.load('images/man_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/man_west1.png').convert(),
+                    pygame.image.load('images/man_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/man_north1.png').convert(),
+                    pygame.image.load('images/man_north2.png').convert()
+                ]
+            ],
+            [
+                # east
+                [
+                    pygame.image.load('images/grandpa_east1.png').convert(),
+                    pygame.image.load('images/grandpa_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/grandpa_south1.png').convert(),
+                    pygame.image.load('images/grandpa_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/grandpa_west1.png').convert(),
+                    pygame.image.load('images/grandpa_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/grandpa_north1.png').convert(),
+                    pygame.image.load('images/grandpa_north2.png').convert()
                 ]
             ]
         ]

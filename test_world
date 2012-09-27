@@ -7,12 +7,12 @@ reproduction_cost = 30
 critter_energy_decay_rate = 0.15
 food_spawn_period = 30
 food_energy = 50
-critter_view_distance = 100
+critter_view_distance = 75
 critter_max_move_speed = 0.5
 reproduction_period = 120
 collision_radius = 10
 reproduction_radius = 100 
-mean_turn_interval = 5
+mean_turn_interval = 2
 
 world_width = 640
 world_height = 640
@@ -28,4 +28,4 @@ tree_horizontal_offset = 32
 tree_vertical_offset = 64
 palm_vertical_offset = 96
 
-ageing_interval = 10
+ageing_interval = 15

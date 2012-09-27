@@ -161,7 +161,7 @@ class Critter(Object):
                 self.age += 1
 
         def render(self, screen):          
-            age_images = self.images[int(min(floor(self.age/self.config.ageing_interval), 1))]
+            age_images = self.images[int(min(floor(self.age/self.config.ageing_interval), 3))]
             direction_quadrant = int(((self.direction + pi/4)%(2*pi))/(pi/2))
             animation_frame = int(self.iteration_counter/self.config.animation_frame_interval) \
                                   % len(age_images[direction_quadrant])
