@@ -25,6 +25,7 @@ class Config:
         "critter_max_move_speed": float,
         "reproduction_period": float,
         "collision_radius": float,
+        "reproduction_radius": float,
         "mean_turn_interval": float,
         "world_width": int,
         "world_height": int,
@@ -90,6 +91,7 @@ class Config:
             (type, colon, x, y) = line.split()
             letter = self.tiles_dict[type]
             self.tile_spec[int(x)][int(y)] = letter     
+        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
 
     def __getitem__(self, name):
         # Operator overload for "config[name]"
@@ -164,7 +166,7 @@ class World(object):
                     
             # Iterate over a copy of the object list since modifying a list
             # while iterating over it is verboten
-            for obj in self.objects:
+            for obj in self.objects[:]:
                 obj.update()
             
             if counter % self.config.food_spawn_period == 0:
