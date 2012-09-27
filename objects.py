@@ -1,5 +1,6 @@
 from images import *
 from agent import *
+import random
 
 class Object(object):
     """ Abstract base class for simulation objects.
@@ -64,7 +65,7 @@ class Food(Object):
 
 class Critter(Object):
         def __init__(self, config, world, object_ID, x, y, direction, 
-                     counter_offset, age, images):     
+                     counter_offset, age, images, gender):     
             self.config = config       
             self.world = world
             self.object_ID = object_ID
@@ -81,6 +82,7 @@ class Critter(Object):
             self.iteration_counter = counter_offset
             self.age = age
             self.heart_countdown = 0
+            self.gender = gender
         
         def update(self):
             # Find all objects close enough to be visible to the agent;
@@ -137,14 +139,21 @@ class Critter(Object):
 
             # Reproduce
             if reproduce:
-                self.heart_countdown = self.config.heart_time
-                reproduce.heart_countdown = self.config.heart_time
-                child = Critter(self.config, self.world, 0,
-                                self.x, self.y, 
-                                self.direction + pi, 0, 0,
-                                get_male_images())
-                self.world.add(child)
-                self.energy -= self.config.reproduction_cost
+				self.heart_countdown = self.config.heart_time
+				reproduce.heart_countdown = self.config.heart_time
+				if random.randint(0, 1) == 1:
+					child = Critter(self.config, self.world, 0,
+								self.x, self.y, 
+								self.direction + pi, 0, 0,
+								get_male_images(), "m")
+				else:
+					child = Critter(self.config, self.world, 0,
+                    	            self.x, self.y, 
+                        			self.direction + pi, 0, 0,
+                                	get_female_images(), "f")
+					
+				self.world.add(child)
+				self.energy -= self.config.reproduction_cost
 
             # Eat food
             for obj in self.world.objects:

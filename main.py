@@ -152,11 +152,17 @@ class World(object):
                                     get_pine(), self.config.tree_horizontal_offset, 
                                     self.config.tree_vertical_offset))
                    
-        for i in xrange(10):
+        for i in xrange(5):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
-                    *self.config.world_height, 0, 
-                            0, 2*self.config.ageing_interval, get_male_images())) # TODO: random counter_offset
+                    *self.config.world_height, random.randint(0, 5), 
+                            random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "f")) # TODO: random counter_offset
+            
+        for i in xrange(5):
+            self.objects.append(Critter(config, self, len(self.objects),
+                random.random()*self.config.world_width, random.random()
+                    *self.config.world_height, random.randint(0, 5), 
+                            random.randint(0, 5), 2*self.config.ageing_interval, get_female_images(), "m"))
             
         for i in xrange(10):
             self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,

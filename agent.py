@@ -31,7 +31,10 @@ class Agent(object):
             # Try to find another critter to reproduce with  
             for (obj, dx, dy) in visible_objects:
                 if obj.get_type() == "Critter" \
-                     and dx**2 + dy**2 <= self.config.reproduction_radius_sq:
+                     and dx**2 + dy**2 <= self.config.reproduction_radius_sq \
+                     and obj.gender != critter.gender \
+                     and floor(critter.age / self.config.ageing_interval) != 0 \
+                     and floor(obj.age / self.config.ageing_interval) != 0:
                     
                     reproduction_target = obj
                     self.clock = 0

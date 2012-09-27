@@ -105,6 +105,111 @@ def get_male_images():
         
     return male_images
 
+female_images = None
+
+def get_female_images():
+    # Returns list of lists where:
+    #  first list is the animation frames for walking east
+    #  second list is the animation frames for walking south
+    #  second list is the animation frames for walking west
+    #  second list is the animation frames for walking north
+
+    global female_images
+    
+    if female_images == None:
+        female_images = [
+            [
+                # east
+                [
+                    pygame.image.load('images/girl_east1.png').convert(),
+                    pygame.image.load('images/girl_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/girl_south1.png').convert(),
+                    pygame.image.load('images/girl_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/girl_west1.png').convert(),
+                    pygame.image.load('images/girl_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/girl_north1.png').convert(),
+                    pygame.image.load('images/girl_north2.png').convert()
+                ]
+            ],
+            [
+                # east
+                [
+                    pygame.image.load('images/teeng_east1.png').convert(),
+                    pygame.image.load('images/teeng_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/teeng_south1.png').convert(),
+                    pygame.image.load('images/teen_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/teeng_west1.png').convert(),
+                    pygame.image.load('images/teeng_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/teeng_north1.png').convert(),
+                    pygame.image.load('images/teeng_north2.png').convert()
+                ]
+            ],
+            [
+                # east
+                [
+                    pygame.image.load('images/woman_east1.png').convert(),
+                    pygame.image.load('images/woman_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/woman_south1.png').convert(),
+                    pygame.image.load('images/woman_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/woman_west1.png').convert(),
+                    pygame.image.load('images/woman_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/woman_north1.png').convert(),
+                    pygame.image.load('images/woman_north2.png').convert()
+                ]
+            ],
+            [
+                # east
+                [
+                    pygame.image.load('images/grandma_east1.png').convert(),
+                    pygame.image.load('images/grandma_east2.png').convert()
+                ],
+                # south
+                [
+                    pygame.image.load('images/grandma_south1.png').convert(),
+                    pygame.image.load('images/grandma_south2.png').convert()
+                ],
+                # west
+                [
+                    pygame.image.load('images/grandma_west1.png').convert(),
+                    pygame.image.load('images/grandma_west2.png').convert()
+                ],
+                # north
+                [
+                    pygame.image.load('images/grandma_north1.png').convert(),
+                    pygame.image.load('images/grandma_north2.png').convert()
+                ]
+            ]
+        ]
+        
+    return female_images
+
 food_image = None
 
 def get_food_image():
