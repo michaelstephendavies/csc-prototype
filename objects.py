@@ -4,20 +4,20 @@ import random
 
 class Object(object):
     """ Abstract base class for simulation objects.
-    
+
     In addition to overriding show, kill and update, all Objects
     must have the following attributes:
     object_ID - unique identifier for the object
     x, y - current simulation co-ordinates of the object
     world - reference to the containing World"""
-    
+
     def __init__(self):
         raise NotImplementedError("Override in your subclass")
-    
+
     def kill(self):
         """ Called when the object is destroyed. """
         pass
-    
+
     def update(self):
         """ Called once every simulation step, to update the
         object's simulation model. """
@@ -27,7 +27,7 @@ class Object(object):
         """ Called once every simulation step, to draw the
         object to the screen. """
         pass
-    
+
     def distance_sq(self, other):
         """ Find the square of the distance between this Object and
         another Object. """
@@ -39,9 +39,9 @@ class Object(object):
         # distance formula.
         dx = min(abs(self.x - other.x), self.config.world_width - abs(self.x - other.x))
         dy = min(abs(self.y - other.y), self.config.world_height - abs(self.y - other.y))
-        
-        return dx**2 + dy**2  
-    
+
+        return dx**2 + dy**2
+
     def get_type(self):
         raise NotImplementedError("Override in your subclass")
 
@@ -54,36 +54,36 @@ class Food(Object):
         self.y = y
         self.energy = contained_energy
         self.food_image = get_food_image()
-    
+
     def render(self, screen):
-        screen.blit(self.food_image, (self.x - self.config.food_horizontal_offset, 
+        screen.blit(self.food_image, (self.x - self.config.food_horizontal_offset,
                                       self.y - self.config.food_vertical_offset))
-        
+
     def get_type(self):
         return "Food"
 
 
 class Critter(Object):
-        def __init__(self, config, world, object_ID, x, y, direction, 
-                     counter_offset, age, images, gender):     
-            self.config = config       
+        def __init__(self, config, world, object_ID, x, y, direction,
+                     counter_offset, age, images, gender, parent1=None, parent2=None):
+            self.config = config
             self.world = world
             self.object_ID = object_ID
             self.x = x
             self.y = y
             self.direction = direction
             self.energy = self.config.initial_energy
-            self.agent = Agent(self.config)           
+            self.agent = Agent(self.config, parent1, parent2)
             self.images = images
             self.heart_image = get_heart()
             # counter to know when to change the animation
-            # given offset so that critters do not move in 
+            # given offset so that critters do not move in
             # unison.
             self.iteration_counter = counter_offset
             self.age = age
             self.heart_countdown = 0
             self.gender = gender
-        
+
         def update(self):
             # Find all objects close enough to be visible to the agent;
             # tag each along with its delta-x and delta-y values relative
@@ -112,7 +112,7 @@ class Critter(Object):
                         dyAround = dyDirect - self.config.world_height
                     else:
                         dyAround = dyDirect + self.config.world_height
-                        
+
                     dy = min((dyDirect, dyAround), key = abs)
 
                     if dx**2 + dy**2 < self.config.critter_view_distance_sq:
@@ -123,7 +123,8 @@ class Critter(Object):
                 self.agent.compute_next_action(self, visible_objects)
 
             # Move
-            if move_distance > self.config.critter_max_move_speed: move_distance = self.config.critter_max_move_speed
+            if move_distance > self.config.critter_max_move_speed:
+                move_distance = self.config.critter_max_move_speed
             self.direction += turn_angle
             self.direction %= 2*pi
             self.x += cos(self.direction) * move_distance
@@ -138,22 +139,24 @@ class Critter(Object):
             self.direction %= 2*pi
 
             # Reproduce
-            if reproduce  and self.is_mature() and reproduce.is_mature():
-				self.heart_countdown = self.config.heart_time
-				reproduce.heart_countdown = self.config.heart_time
-				if random.randint(0, 1) == 1:
-					child = Critter(self.config, self.world, 0,
-								self.x, self.y, 
-								self.direction + pi, 0, 0,
-								get_male_images(), "m")
-				else:
-					child = Critter(self.config, self.world, 0,
-                    	            self.x, self.y, 
-                        			self.direction + pi, 0, 0,
-                                	get_female_images(), "f")
-					
-				self.world.add(child)
-				self.energy -= self.config.reproduction_cost
+            if reproduce and self.is_mature() and reproduce.is_mature() and self.gender != reproduce.gender:
+                self.heart_countdown = self.config.heart_time
+                reproduce.heart_countdown = self.config.heart_time
+                if random.randint(0, 1) == 1:
+                    child = Critter(self.config, self.world, 0,
+                            self.x, self.y,
+                            self.direction + pi, 0, 0,
+                            get_male_images(), "m",
+                            self.agent, reproduce.agent)
+                else:
+                    child = Critter(self.config, self.world, 0,
+                                    self.x, self.y,
+                                    self.direction + pi, 0, 0,
+                                    get_female_images(), "f",
+                                    self.agent, reproduce.agent)
+
+                self.world.add(child)
+                self.energy -= self.config.reproduction_cost
 
             # Eat food
             for obj in self.world.objects:
@@ -166,7 +169,7 @@ class Critter(Object):
             self.energy -= self.config.critter_energy_decay_rate
             if self.energy <= 0:
                 self.world.delete(self)
-                
+
             # update the counter
             self.iteration_counter += 1
             # update these once per second
@@ -174,30 +177,30 @@ class Critter(Object):
                 self.heart_countdown -= 1
                 self.age += 1
 
-        def render(self, screen):          
+        def render(self, screen):
             age_images = self.images[int(min(floor(self.age/self.config.ageing_interval), 3))]
             direction_quadrant = int(((self.direction + pi/4)%(2*pi))/(pi/2))
             animation_frame = int(self.iteration_counter/self.config.animation_frame_interval) \
                                   % len(age_images[direction_quadrant])
 
             screen.blit(age_images[direction_quadrant][animation_frame],
-                        (self.x - self.config.critter_horizontal_center, 
+                        (self.x - self.config.critter_horizontal_center,
                          self.y - self.config.critter_vertical_center))
-            
+
             if self.heart_countdown > 0:
                 screen.blit(self.heart_image,
-                        (self.x - self.config.critter_horizontal_center + self.config.heart_offset - 2, 
-                         self.y - self.config.critter_vertical_center 
+                        (self.x - self.config.critter_horizontal_center + self.config.heart_offset - 2,
+                         self.y - self.config.critter_vertical_center
                          - self.config.heart_offset - 7))
-                
+
         def is_mature(self):
             return self.age >= self.config.maturity_age
-        
+
         def get_type(self):
             return "Critter"
-    
+
 class Scenery(Object):
-    def __init__(self, config, world, object_ID, x, y, image, 
+    def __init__(self, config, world, object_ID, x, y, image,
                     horizontal_offset, vertical_offset):
         self.config = config
         self.world = world
@@ -207,11 +210,11 @@ class Scenery(Object):
         self.image = image
         self.horizontal_offset = horizontal_offset
         self.vertical_offset = vertical_offset
-    
+
     def render(self, screen):
         screen.blit(self.image, (self.x - self.horizontal_offset,
                                  self.y - self.vertical_offset))
-        
+
     def get_type(self):
         return "Scenery"
 

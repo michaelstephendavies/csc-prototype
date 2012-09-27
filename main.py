@@ -15,22 +15,42 @@ class Config:
 
     # Map from setting name to a string parsing function
     setting_dict = {
-        "initial_energy": float,
-        "reproduction_energy_threshold": float,
-        "reproduction_cost": float,
-        "critter_energy_decay_rate": float,
-        "food_spawn_period": int,
-        "food_energy": int,
-        "critter_view_distance": float,
-        "critter_max_move_speed": float,
-        "reproduction_period": float,
-        "collision_radius": float,
-        "reproduction_radius": float,
-        "mean_turn_interval": float,
+        "random_seed": str,
         "world_width": int,
         "world_height": int,
-        "tile_size": int,
+        
+        # Critter settings
+        "initial_energy": float,
+        "critter_energy_decay_rate": float,
+        "reproduction_cost": float,
+        "critter_view_distance": float,
+        "critter_max_move_speed": float,
+        "maturity_age": int,
+        "reproduction_radius": float,
+        
+        # Food settings
+        "food_spawn_period": int,
+        "food_energy": int,
+        "collision_radius": float,
+
+        # Agent settings
+        "agent_setting_variance": float,
+        "reproduction_energy_threshold": float,
+        "reproduction_energy_threshold_min": float,
+        "reproduction_energy_threshold_max": float,
+        "reproduction_period": float,
+        "reproduction_period_min": float,
+        "reproduction_period_max": float,
+        "mean_turn_interval": float,
+        "mean_turn_interval_min": float,
+        "mean_turn_interval_max": float,
+        "agent_move_speed": float,
+        "agent_move_speed_min": float,
+        "agent_move_speed_max": float,
+
+        # Graphical settings
         "framerate": int,
+        "tile_size": int,
         "animation_frame_interval": int,
         "critter_vertical_center": int,
         "critter_horizontal_center": int,
@@ -40,10 +60,8 @@ class Config:
         "tree_vertical_offset" : int,
         "palm_vertical_offset" : int,
         "ageing_interval" : int,
-        "maturity_age": int,
         "heart_time" : int,
-        "heart_offset" : int,
-        "random_seed" : float
+        "heart_offset" : int
     }
         
     tiles_dict = {
@@ -159,13 +177,13 @@ class World(object):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
-                            random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "f")) # TODO: random counter_offset
-            
+                            random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "m")) # TODO: random counter_offset
+        
         for i in xrange(5):
             self.objects.append(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
-                            random.randint(0, 5), 2*self.config.ageing_interval, get_female_images(), "m"))
+                            random.randint(0, 5), 2*self.config.ageing_interval, get_female_images(), "f"))
             
         for i in xrange(10):
             self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
@@ -189,7 +207,7 @@ class World(object):
         "p" : get_tile_pit(),
         "s" : get_tile_sand(),
         "i" : get_tile_dirt()
-            }
+        }
 
         while True:
             clock = pygame.time.Clock()
