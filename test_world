@@ -3,10 +3,6 @@
 # Leave blank to use the OS's randomness source
 random_seed =
 
-# World dimensions in pixels
-world_width = 640
-world_height = 640
-
 # ----------------
 # Critter settings
 # ----------------
@@ -52,7 +48,7 @@ collision_radius = 10
 # Maximum possible "mutation" to apply to each agent setting
 # when creating a new agent, as a proportion of the current setting value
 # Set to 0 to disable entirely.
-agent_setting_variance = 1
+agent_setting_variance = 0.4
 
 # Amount of energy a critter must have before considering spending it
 # on making children
@@ -78,7 +74,9 @@ agent_move_speed = 0.5
 agent_move_speed_min = 0
 agent_move_speed_max = 6
 
+# ------------------
 # Graphical settings
+# ------------------
 
 tile_size = 64
 framerate = 50
@@ -95,5 +93,5 @@ heart_time = 2
 heart_offset = 10
 skeleton_vertical_offset = 32
 skeleton_horizontal_offset = 16
-skeleton_time = 20
+skeleton_time = 2
 small_object_offset = 16

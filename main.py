@@ -10,14 +10,13 @@ random.seed()
 #imports from our own files
 from images import *
 from objects import *
+from graphs import *
 
 class Config:
 
     # Map from setting name to a string parsing function
     setting_dict = {
         "random_seed": str,
-        "world_width": int,
-        "world_height": int,
         
         # Critter settings
         "initial_energy": float,
@@ -109,7 +108,6 @@ class Config:
         self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
         self.collision_radius_sq = self.settings["collision_radius"]**2
         self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
-
         
         # the bit to do the world spec
         spec_file = open(spec_filename)
@@ -129,11 +127,13 @@ class Config:
                 self.tile_spec[int(x)][int(y)] = letter   
             else:
                 self.scenery.append([type, int(x), int(y)])
-                      
+
+        self.world_width = self.cols * self.settings["tile_size"]
+        self.world_height = self.rows * self.settings["tile_size"]          
 
     def __getitem__(self, name):
         # Operator overload for "config[name]"
-        return self.settings[name]
+        return getattr(self, name)
     
     def __getattr__(self, name):
         # Called when an attribute of a Config object is found, but Python
@@ -238,6 +238,8 @@ class World(object):
         "s" : get_tile_sand(),
         "i" : get_tile_dirt()
         }
+
+        test_graph = LineGraph(5, 5, 200, 100, "Population vs Time", 30, Color(200, 200, 200))
         
         # variables to help the eagle and dove only sometimes
         # fly accross 
@@ -259,9 +261,9 @@ class World(object):
                 if event.type == QUIT:
                     return            
 
-            for x in xrange(self.config.rows):
-                for y in xrange(self.config.cols):
-                       self.screen.blit(tiles[self.config.tile_spec[x][y]], 
+            for y in xrange(self.config.rows):
+                for x in xrange(self.config.cols):
+                       self.screen.blit(tiles[self.config.tile_spec[y][x]], 
                                         (x*self.config.tile_size, y*self.config.tile_size)) 
         
             # Iterate over a copy of the object list since modifying a list
@@ -280,7 +282,7 @@ class World(object):
 
             for obj in self.objects:
                 obj.render(self.screen)
-                
+            
             # add in the eagle and dove
             frame_choice = int(floor((counter / self.config.framerate)*5) % 2)
             if(eagle_on):
@@ -307,7 +309,10 @@ class World(object):
                 dove_y = 0
                 dove_start = counter
                 dove_x = (random.randint(1, 9)/10)*self.config.world_width
-                            
+
+            test_graph.add_data_point(len([obj for obj in self.objects if obj.get_type() == "Critter"]))
+            test_graph.render(self.screen)
+            
             counter += 1    
             
             pygame.display.flip()
@@ -325,5 +330,6 @@ if __name__ == '__main__':
         random.seed(hash(config.random_seed))
     
     pygame.init()
+    pygame.font.init()
     screen = pygame.display.set_mode((config.world_width, config.world_height))
     World(screen, config).run()
