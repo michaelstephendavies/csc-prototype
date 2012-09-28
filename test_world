@@ -93,3 +93,7 @@ palm_vertical_offset = 96
 ageing_interval = 15
 heart_time = 2
 heart_offset = 10
+skeleton_vertical_offset = 32
+skeleton_horizontal_offset = 16
+skeleton_time = 20
+small_object_offset = 16

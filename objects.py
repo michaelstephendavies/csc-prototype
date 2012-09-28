@@ -168,6 +168,11 @@ class Critter(Object):
             # Energy decay + death
             self.energy -= self.config.critter_energy_decay_rate
             if self.energy <= 0:
+                self.world.add_skeleton(Skeleton(self.config, self.world,
+                                                     0, self.x, self.y, 
+                                       get_skeleton(), 
+                                       self.config.skeleton_horizontal_offset, 
+                                       self.config.skeleton_vertical_offset))
                 self.world.delete(self)
 
             # update the counter
@@ -217,4 +222,28 @@ class Scenery(Object):
 
     def get_type(self):
         return "Scenery"
+    
+class Skeleton(Object):
+    def __init__(self, config, world, object_ID, x, y, image,
+                    horizontal_offset, vertical_offset):
+        self.config = config
+        self.world = world
+        self.object_ID = object_ID
+        self.x = x
+        self.y = y
+        self.image = image
+        self.horizontal_offset = horizontal_offset
+        self.vertical_offset = vertical_offset
+        self.countdown = self.config.skeleton_time*self.config.framerate
+
+    def render(self, screen):
+        screen.blit(self.image, (self.x - self.horizontal_offset,
+                                 self.y - self.vertical_offset))
+        self.countdown -= 1
+        if self.countdown <= 0:
+            self.world.delete_skeleton(self)
+
+    def get_type(self):
+        return "Scenery"
+
 

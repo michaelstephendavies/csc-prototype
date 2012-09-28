@@ -61,7 +61,11 @@ class Config:
         "palm_vertical_offset" : int,
         "ageing_interval" : int,
         "heart_time" : int,
-        "heart_offset" : int
+        "heart_offset" : int,
+        "skeleton_vertical_offset" : int,
+        "skeleton_horizontal_offset" : int,
+        "skeleton_time" : int,
+        "small_object_offset" : int
     }
         
     tiles_dict = {
@@ -151,7 +155,7 @@ class World(object):
         # positive y is down. Directions are given with positive being clockwise.
         self.screen = screen
         self.config = config
-        
+        self.skeletons = []
         self.objects = []
         
         # add scenery to objects
@@ -172,6 +176,26 @@ class World(object):
                 self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
                                     get_pine(), self.config.tree_horizontal_offset, 
                                     self.config.tree_vertical_offset))
+            elif item[0] == "fern":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_fern(), self.config.small_object_offset, 
+                                    self.config.small_object_offset))
+            elif item[0] == "rocks":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_rocks(), self.config.small_object_offset, 
+                                    self.config.small_object_offset))
+            elif item[0] == "stump":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_stump(), self.config.small_object_offset, 
+                                    self.config.small_object_offset))
+            elif item[0] == "yellow_flowers":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_yellow_flowers(), self.config.small_object_offset, 
+                                    self.config.small_object_offset))
+            elif item[0] == "pink_flowers":
+                self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
+                                    get_pink_flowers(), self.config.small_object_offset, 
+                                    self.config.small_object_offset))
                    
         for i in xrange(5):
             self.objects.append(Critter(config, self, len(self.objects),
@@ -195,6 +219,12 @@ class World(object):
 
     def add(self, new_obj):
         self.objects.append(new_obj)
+        
+    def add_skeleton(self, new_skeleton):
+        self.skeletons.append(new_skeleton)
+        
+    def delete_skeleton(self, skeleton):
+        self.skeletons.remove(skeleton)
     
     def run(self):
         counter = 0
@@ -244,6 +274,9 @@ class World(object):
                               random.random()*self.config.world_height, self.config.food_energy))
                 
             self.objects.sort(key = lambda obj: obj.y)
+            
+            for skeleton in self.skeletons:
+                skeleton.render(self.screen)
 
             for obj in self.objects:
                 obj.render(self.screen)

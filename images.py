@@ -236,6 +236,16 @@ def get_dove():
 
     return dove
 
+skeleton = None
+
+def get_skeleton():
+    global skeleton
+
+    if skeleton == None:
+        skeleton = pygame.image.load('images/bones.png').convert_alpha()
+
+    return skeleton
+
 food_image = None
 
 def get_food_image():
@@ -365,4 +375,54 @@ def get_heart():
         heart = pygame.image.load('images/heart2.png').convert_alpha()
 
     return heart
+
+fern = None
+
+def get_fern():
+    global fern
+
+    if fern == None:
+        fern = pygame.image.load('images/fern.png').convert_alpha()
+
+    return fern
+
+pink_flowers = None
+
+def get_pink_flowers():
+    global pink_flowers
+
+    if pink_flowers == None:
+        pink_flowers = pygame.image.load('images/pink_flowers.png').convert_alpha()
+
+    return pink_flowers
+
+yellow_flowers = None
+
+def get_yellow_flowers():
+    global yellow_flowers
+
+    if yellow_flowers == None:
+        yellow_flowers = pygame.image.load('images/yellow_flowers.png').convert_alpha()
+
+    return yellow_flowers
+
+rocks = None
+
+def get_rocks():
+    global rocks
+
+    if rocks == None:
+        rocks = pygame.image.load('images/rocks.png').convert_alpha()
+
+    return rocks
+
+stump = None
+
+def get_stump():
+    global stump
+
+    if stump == None:
+        stump = pygame.image.load('images/stump.png').convert_alpha()
+
+    return stump
 

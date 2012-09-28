@@ -24,3 +24,8 @@ palm : 400 300
 dead_tree : 300 500
 oak : 400 600
 pine : 100 350
+rocks : 320 320
+stump : 633 80
+fern : 422 100
+yellow_flowers : 360 340
+pink_flowers : 200 200
