@@ -210,6 +210,32 @@ def get_female_images():
         
     return female_images
 
+eagle = None
+
+def get_eagle():
+    global eagle
+
+    if eagle == None:
+        eagle = [
+                 pygame.image.load('images/eagle1.png').convert_alpha(),
+                 pygame.image.load('images/eagle2.png').convert_alpha()
+                 ]
+
+    return eagle
+
+dove = None
+
+def get_dove():
+    global dove
+
+    if dove == None:
+        dove = [
+                 pygame.image.load('images/dove1.png').convert_alpha(),
+                 pygame.image.load('images/dove2.png').convert_alpha()
+                 ]
+
+    return dove
+
 food_image = None
 
 def get_food_image():

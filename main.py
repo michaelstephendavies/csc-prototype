@@ -208,7 +208,19 @@ class World(object):
         "s" : get_tile_sand(),
         "i" : get_tile_dirt()
         }
-
+        
+        # variables to help the eagle and dove only sometimes
+        # fly accross 
+        eagle_on = True
+        eagle_x = 0
+        eagle_y = 0.1*self.config.world_height # first y channel
+        eagle_start = 0
+        dove_on = True
+        dove_x = 0.1*self.config.world_width # first x channel
+        dove_y = 0
+        dove_start = 0
+        
+        
         while True:
             clock = pygame.time.Clock()
             clock.tick(self.config.framerate)
@@ -236,9 +248,36 @@ class World(object):
             for obj in self.objects:
                 obj.render(self.screen)
                 
-            pygame.display.flip()
-                
+            # add in the eagle and dove
+            frame_choice = int(floor((counter / self.config.framerate)*5) % 2)
+            if(eagle_on):
+                if eagle_x > self.config.world_width:
+                    eagle_on = False   
+                eagle_x = (counter - eagle_start)
+                screen.blit(get_eagle()[frame_choice], (eagle_x, eagle_y))
+            if (not eagle_on) and \
+                random.randint(0, 2*self.config.framerate - 1) == \
+                (counter % 2*self.config.framerate):
+                eagle_on = True
+                eagle_x = 0
+                eagle_start = counter
+                eagle_y = (random.randint(1, 9)/10)*self.config.world_height
+            if(dove_on):
+                if dove_y < 0:
+                    dove_on = False   
+                dove_y = (self.config.world_height - (counter - dove_start))
+                screen.blit(get_dove()[frame_choice], (dove_x, dove_y))
+            if (not dove_on) and \
+                random.randint(0, 2*self.config.framerate - 1) == \
+                (counter % 2*self.config.framerate):
+                dove_on = True
+                dove_y = 0
+                dove_start = counter
+                dove_x = (random.randint(1, 9)/10)*self.config.world_width
+                            
             counter += 1    
+            
+            pygame.display.flip()
 
 if __name__ == '__main__':
     try:
