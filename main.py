@@ -59,14 +59,17 @@ class Config:
         "population_graph_high": int,
         "population_graph_scale_division": int,
         "population_graph_update_period": int,
+        "population_graph_export_path": str,
         "food_graph": int,
         "food_graph_high": int,
         "food_graph_scale_division": int,
         "food_graph_update_period": int,
+        "food_graph_export_path": str,
         "agent_move_speed_graph": int,
         "agent_move_speed_graph_high": float,
         "agent_move_speed_graph_scale_division": float,
         "agent_move_speed_graph_update_period": int,
+        "agent_move_speed_graph_export_path": str,
         
         # Graphical settings
         "framerate": int,
@@ -211,14 +214,16 @@ class World(object):
                     self.graphs.append(PopulationGraph(self, config.world_width, current_y, config.graph_width,
                                                        vertical_space_per_graph, config.population_graph_high,
                                                        config.population_graph_scale_division,
-                                                       config.population_graph_update_period))
+                                                       config.population_graph_update_period,
+                                                       config.population_graph_export_path))
                     current_y += vertical_space_per_graph + padding
 
                 if config.food_graph:
                     self.graphs.append(FoodGraph(self, config.world_width, current_y, config.graph_width,
                                                  vertical_space_per_graph, config.food_graph_high,
                                                  config.food_graph_scale_division,
-                                                 config.food_graph_update_period))
+                                                 config.food_graph_update_period,
+                                                 config.food_graph_export_path))
                     current_y += vertical_space_per_graph + padding
 
                 if config.agent_move_speed_graph:
@@ -227,7 +232,8 @@ class World(object):
                                                        vertical_space_per_graph, "Average move speed vs Time",
                                                        config.agent_move_speed_graph_high,
                                                        config.agent_move_speed_graph_scale_division,
-                                                       config.agent_move_speed_graph_update_period))
+                                                       config.agent_move_speed_graph_update_period,
+                                                       config.agent_move_speed_graph_export_path))
                     current_y += vertical_space_per_graph + padding
                 
         
@@ -347,7 +353,9 @@ class World(object):
             
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return            
+                    for graph in graphs:
+                        graph.finish()
+                    return
 
             for x in xrange(self.config.cols):
                 for y in xrange(self.config.rows):
@@ -409,6 +417,7 @@ class World(object):
             counter += 1    
             
             pygame.display.flip()
+            
 
 if __name__ == '__main__':
     try:

@@ -99,7 +99,7 @@ enable_graphs = 1
 # Width of graphs in pixels
 graph_width = 200
 
-# Each graph is characterised by 4 settings:
+# Each graph is characterised by 5 settings:
 # <graphname> - set to 0 to hide this graph, nonzero to show it
 # <graphname>_high - highest possible y-value the graph can show;
 #                    increase it to increase the vertical graph scale
@@ -107,18 +107,21 @@ graph_width = 200
 #                              should divide into <graphname>_high exactly
 # <graphname>_update_period - number of frames represented by a single pixel
 #                             on the x-axis
+# <graphname>_export_path - if nonempty, export graph to a CSV file at the given path
 
 # Graph showing critter population over time
 population_graph = 1
 population_graph_high = 50
 population_graph_scale_division = 10
 population_graph_update_period = 15
+population_graph_export_path =
 
 # Graph showing food levels over time
 food_graph = 1
 food_graph_high = 50
 food_graph_scale_division = 10
 food_graph_update_period = 15
+food_graph_export_path =
 
 # Graph showing average agent_move_speed value across
 # all alive critters over time
@@ -126,6 +129,7 @@ agent_move_speed_graph = 1
 agent_move_speed_graph_high = 3
 agent_move_speed_graph_scale_division = 0.5
 agent_move_speed_graph_update_period = 50
+agent_move_speed_graph_export_path = movespeed.csv
 
 # ------------------
 # Graphical settings
