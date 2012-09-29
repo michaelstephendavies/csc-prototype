@@ -218,8 +218,6 @@ class Scenery(Object):
         self.vertical_offset = vertical_offset
 
     def render(self, screen):
-        foo = 0, 0, 0
-        pygame.draw.circle(self.image, foo, (self.horizontal_offset, self.vertical_offset), 5)
         screen.blit(self.image, (self.x - self.horizontal_offset,
                                  self.y - self.vertical_offset))
 
