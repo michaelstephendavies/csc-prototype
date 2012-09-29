@@ -298,8 +298,7 @@ class World(object):
         if obj.get_type() in self.object_count:
             self.object_count[obj.get_type()] -= 1
 
-    def add(self, new_obj):
-        
+    def add(self, new_obj):        
         # make sure the food is not too close to scenery, this messes
         # with the collision avoidance
         can_add = True
@@ -315,6 +314,11 @@ class World(object):
         
         if new_obj.get_type() in self.object_count:
             self.object_count[new_obj.get_type()] += 1
+
+    # adds an object without considering whether it is on top of another
+    # object            
+    def add_here(self, new_obj):
+        self.objects.append(new_obj)
         
     def add_skeleton(self, new_skeleton):
         self.skeletons.append(new_skeleton)

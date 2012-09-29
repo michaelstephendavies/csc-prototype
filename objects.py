@@ -155,7 +155,7 @@ class Critter(Object):
                                     get_female_images(), "f",
                                     self.agent, reproduce.agent)
 
-                self.world.add(child)
+                self.world.add_here(child)
                 self.energy -= self.config.reproduction_cost
 
             # Eat food
