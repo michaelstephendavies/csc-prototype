@@ -239,7 +239,7 @@ class World(object):
         "i" : get_tile_dirt()
         }
 
-        test_graph = LineGraph(5, 5, 200, 100, "Population vs Time", 50, Color(200, 200, 200), Color(50, 50, 100))
+        test_graph = LineGraph(5, 5, 200, 100, "Population vs Time", 50, 10, Color(200, 200, 200), Color(80, 80, 150))
         
         # variables to help the eagle and dove only sometimes
         # fly accross 
