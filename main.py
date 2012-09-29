@@ -33,7 +33,7 @@ class Config:
         "collision_radius": float,
 
         # Agent settings
-        "agent_setting_variance": float,
+        "agent_trait_variance": float,
         "reproduction_energy_threshold": float,
         "reproduction_energy_threshold_min": float,
         "reproduction_energy_threshold_max": float,
