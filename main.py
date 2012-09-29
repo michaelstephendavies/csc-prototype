@@ -1,6 +1,7 @@
 from __future__ import division
 
 import os, sys
+from os import path
 import pygame
 from pygame.locals import *
 from math import *
@@ -104,7 +105,9 @@ class Config:
         self.settings = {}
         errors = []
         
-        with open(conf_filename) as conf_file:
+        conf_string = "setups/" + conf_filename
+        conf_path = path.relpath(conf_string)
+        with open(conf_path) as conf_file:
             for line in conf_file.readlines():
                 line = line.strip()
                 if (not line.startswith("#")) and line != "":
@@ -135,7 +138,9 @@ class Config:
         self.scenery_avoidance_radius_sq = self.settings["scenery_avoidance_radius"]**2
         
         # the bit to do the world spec
-        spec_file = open(spec_filename)
+        spec_string = "setups/" + spec_filename
+        spec_path = path.relpath(spec_string)
+        spec_file = open(spec_path)
         first_line = spec_file.readline()
         (rows, cols) = first_line.split()
         self.rows = int(rows)
@@ -299,8 +304,7 @@ class World(object):
         if obj.get_type() in self.object_count:
             self.object_count[obj.get_type()] -= 1
 
-    def add(self, new_obj):
-        
+    def add(self, new_obj):        
         # make sure the food is not too close to scenery, this messes
         # with the collision avoidance
         can_add = True
@@ -316,6 +320,11 @@ class World(object):
         
         if new_obj.get_type() in self.object_count:
             self.object_count[new_obj.get_type()] += 1
+
+    # adds an object without considering whether it is on top of another
+    # object            
+    def add_here(self, new_obj):
+        self.objects.append(new_obj)
         
     def add_skeleton(self, new_skeleton):
         self.skeletons.append(new_skeleton)
@@ -349,6 +358,7 @@ class World(object):
         
         while True:
             clock = pygame.time.Clock()
+            
             clock.tick(self.config.framerate)
             
             for event in pygame.event.get():
