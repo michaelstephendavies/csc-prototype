@@ -1,0 +1,154 @@
+
+# Random number generator seed; can be any string
+# Leave blank to use the OS's randomness source
+random_seed =
+
+# ----------------
+# Critter settings
+# ----------------
+
+# Numbers of critters who spawn at the beginning
+starting_males = 10
+starting_females = 10
+
+# Energy held by a critter at birth
+initial_energy = 100
+
+# Amount of energy lost by a critter per frame
+critter_energy_decay_rate = 0.15
+
+# Amount of energy spent by critter to make a child
+reproduction_cost = 30
+
+# Critter's vision radius in pixels
+critter_view_distance = 200
+
+# Critter's max move speed in pixels per frame
+critter_max_move_speed = 2
+
+# Number of seconds critter must live for before being able to reproduce
+maturity_age = 15
+
+# Maximum possible distance between critters before they can reproduce
+reproduction_radius = 75
+
+# -------------
+# Food settings
+# -------------
+
+# Number of frames between subsequent food spawns
+food_spawn_period = 30
+
+# Amount of energy contained in a single food item
+food_energy = 50
+
+# How close a critter must be to a food item before eating it, in pixels
+collision_radius = 10
+
+# --------------
+# Agent settings
+# --------------
+
+# Maximum possible "mutation" to apply to each agent trait
+# when creating a new agent, as a proportion of the initial trait value
+# Set to 0 to disable entirely.
+agent_trait_variance = 0.6
+
+# Each trait is characterised by three config settings
+# <traitname> - trait value held by the initial critters at world start
+# <traitname>_min, <traitname>_max - lower and upper bound on trait values
+
+# Amount of energy a critter must have before considering spending it
+# on making children
+reproduction_energy_threshold = 100
+reproduction_energy_threshold_min = 30
+reproduction_energy_threshold_max = 10000
+
+# Minimum time period after reproducing before a critter will
+# reproduce again
+reproduction_period = 120
+reproduction_period_min = 20
+reproduction_period_max = 250
+
+# Average time period before a critter changes direction when
+# not moving towards food
+mean_turn_interval = 2
+mean_turn_interval_min = 0.5
+mean_turn_interval_max = 5
+
+# How fast the agent tries to move the critter (this setting can vary
+# between critters, unlike critter_max_move_speed which is a hard "physical" limitation)
+agent_move_speed = 1
+agent_move_speed_min = 0.5
+agent_move_speed_max = 4
+
+# How close the critter needs to be to something before it starts moving away
+critter_avoidance_radius = 0
+scenery_avoidance_radius = 30
+# how long the critter should walk in a straight line after avoiding something,
+# this prevents critters just turning on the spot
+avoidance_time = 0.5
+
+# --------------
+# Graph settings
+# --------------
+
+# Set to 0 to disable graphs entirely, nonzero to use graphs
+enable_graphs = 1
+
+# Width of graphs in pixels
+graph_width = 200
+
+# Each graph is characterised by 5 settings:
+# <graphname> - set to 0 to hide this graph, nonzero to show it
+# <graphname>_high - highest possible y-value the graph can show;
+#                    increase it to increase the vertical graph scale
+# <graphname>_scale_division - amount of y-value space between scale marks;
+#                              should divide into <graphname>_high exactly
+# <graphname>_update_period - number of frames represented by a single pixel
+#                             on the x-axis
+# <graphname>_export_path - if nonempty, export graph to a CSV file at the given path
+
+# Graph showing critter population over time
+population_graph = 1
+population_graph_high = 50
+population_graph_scale_division = 10
+population_graph_update_period = 15
+population_graph_export_path =
+
+# Graph showing food levels over time
+food_graph = 1
+food_graph_high = 50
+food_graph_scale_division = 10
+food_graph_update_period = 15
+food_graph_export_path =
+
+# Graph showing average agent_move_speed value across
+# all alive critters over time
+agent_move_speed_graph = 1
+agent_move_speed_graph_high = 3
+agent_move_speed_graph_scale_division = 0.5
+agent_move_speed_graph_update_period = 50
+agent_move_speed_graph_export_path =
+
+# ------------------
+# Graphical settings
+# ------------------
+
+tile_size = 64
+framerate = 100
+animation_frame_interval = 8
+critter_vertical_center = 48
+critter_horizontal_center = 16
+food_vertical_offset = 37
+food_horizontal_offset = 12
+tree_horizontal_offset = 32
+tree_vertical_offset = 55
+palm_vertical_offset = 85
+ageing_interval = 15
+heart_time = 2
+heart_offset = 10
+skeleton_vertical_offset = 32
+skeleton_horizontal_offset = 16
+skeleton_time = 2
+small_object_offset = 16
