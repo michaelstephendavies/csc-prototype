@@ -38,8 +38,6 @@ class Agent(object):
                 value += (2*random.random() - 1)*config.agent_trait_variance*config[t]
                 value = bound(value, config[t + "_min"], config[t + "_max"])
                 self.traits[t] = value
-
-            print self.traits
         
     def compute_next_action(self, critter, visible_objects):
         """ Given the current state of the critter and a list of visible

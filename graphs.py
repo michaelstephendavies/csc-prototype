@@ -39,11 +39,14 @@ class Graph(object):
 
 
 class LineGraph(Graph):
-    def __init__(self, x, y, width, height, title, high, bg_color=Color(255, 255, 255), out_file=None):
+    def __init__(self, x, y, width, height, title, high,
+                 bg_color=Color(255, 255, 255),
+                 fg_color=Color(50, 50, 50), out_file=None):
+        
         Graph.__init__(self, x, y, width, height, title, bg_color, out_file)
         self.high = high
+        self.fg_color = fg_color
 
-        self.last_data_point_scaled = self.rect.height
         self.graph_surface = pygame.Surface((width, height))
         self.graph_surface.fill(bg_color)
 
@@ -54,8 +57,8 @@ class LineGraph(Graph):
         pygame.draw.line(self.graph_surface, self.bg_color,
                          (self.rect.width-1, 0),
                          (self.rect.width-1, self.rect.height))
-        pygame.draw.line(self.graph_surface, (0, 0, 0),
-                         (self.rect.width-1, self.last_data_point_scaled),
+        pygame.draw.line(self.graph_surface, self.fg_color,
+                         (self.rect.width-1, self.rect.height),
                          (self.rect.width-1, new_data_point_scaled))
 
         self.last_data_point_scaled = new_data_point_scaled
