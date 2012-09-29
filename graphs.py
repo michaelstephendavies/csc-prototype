@@ -31,6 +31,7 @@ def mean(iterable):
     if length == 0: return 0
     return total/length
 
+
 class Graph(object):
     def __init__(self, x, y, width, height, title, update_period,
                  bg_color=Color(255, 255, 255), out_file=None):
@@ -41,22 +42,26 @@ class Graph(object):
         self.update_period = update_period
         self.counter = 0
         
-        if out_file != None:
+        if out_file != None and out_file != "":
             self.out = open(out_file, "w")
         else:
             self.out = None
 
     def update(self):
         self.counter += 1
-        if self.counter >= self.update_period:
+        if self.counter % self.update_period == 0:
             self.update_inner()
-            self.counter = 0
 
     def update_inner(self):
         raise NotImplementedError("Override in your subclass")
+
+    def write_to_output(self, string):
+        if self.out != None:
+            self.out.write(string)
     
     def finish(self):
-        self.out.close()
+        if self.out != None:
+            self.out.close()
     
     def render(self, screen):
         screen.fill(self.bg_color, self.rect)
@@ -86,6 +91,9 @@ class LineGraph(Graph):
         self.graph_surface = pygame.Surface((self.graph_area_rect.width, self.graph_area_rect.height))
         self.graph_surface.fill(bg_color)
 
+        self.write_to_output(title+"\n")
+        self.write_to_output("Frame,Value\n")
+    
     def add_data_point(self, new_point):
         new_data_point_scaled = int((1 - new_point/self.high) * self.graph_area_rect.height)
 
@@ -98,6 +106,8 @@ class LineGraph(Graph):
                          (self.graph_area_rect.width-1, new_data_point_scaled))
 
         self.last_data_point_scaled = new_data_point_scaled
+
+        self.write_to_output("{0},{1}\n".format(self.counter, new_point))
     
     def render_foreground(self, screen):
         screen.blit(self.graph_surface, self.graph_area_rect)
