@@ -1,12 +1,14 @@
 import random
 
-NUM_TREES = 10
-RADIUS = 250
-CENTER_X = 100
+NUM_TREES = 125
+RADIUS = 325
+CENTER_X = 600
 CENTER_Y = 100
 TYPES = ["pine", "dead_tree", "oak"]
 
-file = open("cool_large", "w")
+file = open("large_world_spec", "w")
+
+file.write("15 15\n")
 
 for i in xrange(0, NUM_TREES):
     file.write(TYPES[random.randint(0, 2)])

@@ -297,15 +297,14 @@ class World(object):
         # make sure the food is not too close to scenery, this messes
         # with the collision avoidance
         can_add = True
-        if new_obj.get_type() == "Food":
-            for obj in self.objects:
-                 if new_obj.distance_sq(obj) < 1.5*self.config.scenery_avoidance_radius_sq:
-                     new_obj.x += random.random()*self.config.world_width
-                     new_obj.x %= self.config.world_width
-                     new_obj.y += random.random()*self.config.world_height
-                     new_obj.y %= self.config.world_height
-                     self.add(new_obj)
-                     return
+        for obj in self.objects:
+            if new_obj.distance_sq(obj) < 1.5*self.config.scenery_avoidance_radius_sq:
+                new_obj.x += random.random()*self.config.world_width
+                new_obj.x %= self.config.world_width
+                new_obj.y += random.random()*self.config.world_height
+                new_obj.y %= self.config.world_height
+                self.add(new_obj)
+                return
         self.objects.append(new_obj)
         
         if new_obj.get_type() in self.object_count:
