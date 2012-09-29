@@ -325,6 +325,9 @@ class World(object):
     # object            
     def add_here(self, new_obj):
         self.objects.append(new_obj)
+
+        if new_obj.get_type() in self.object_count:
+            self.object_count[new_obj.get_type()] += 1
         
     def add_skeleton(self, new_skeleton):
         self.skeletons.append(new_skeleton)
@@ -363,7 +366,7 @@ class World(object):
             
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    for graph in graphs:
+                    for graph in self.graphs:
                         graph.finish()
                     return
 
