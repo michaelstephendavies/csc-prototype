@@ -83,7 +83,6 @@ class Critter(Object):
             self.age = age
             self.heart_countdown = 0
             self.gender = gender
-            self.avoidance_countdown = 0
 
         def update(self):
             # Find all objects close enough to be visible to the agent;
