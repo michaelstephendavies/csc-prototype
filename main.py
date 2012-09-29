@@ -127,10 +127,11 @@ class Config:
         (rows, cols) = first_line.split()
         self.rows = int(rows)
         self.cols = int(cols)
+        
         # making something to hold info on
         self.scenery = []                
         # making a matrix of g's
-        self.tile_spec = [["g" for a in xrange(int(cols))] for b in xrange(int(rows))]
+        self.tile_spec = [["g" for a in xrange(self.rows)] for b in xrange(int(self.cols))]
         # adding in the other tiles
         for line in spec_file:
             (type, colon, x, y) = line.split()
@@ -316,9 +317,9 @@ class World(object):
                 if event.type == QUIT:
                     return            
 
-            for y in xrange(self.config.rows):
-                for x in xrange(self.config.cols):
-                       self.screen.blit(tiles[self.config.tile_spec[y][x]], 
+            for x in xrange(self.config.cols):
+                for y in xrange(self.config.rows):
+                       self.screen.blit(tiles[self.config.tile_spec[x][y]], 
                                         (x*self.config.tile_size, y*self.config.tile_size)) 
         
             # Iterate over a copy of the object list since modifying a list
