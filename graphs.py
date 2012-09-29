@@ -20,13 +20,26 @@ def float_xrange(start, stop, step):
         yield x
         x += step
 
+def mean(iterable):
+    total = 0
+    length = 0
+    
+    for value in iterable:
+        total += value
+        length += 1
+
+    if length == 0: return 0
+    return total/length
+
 class Graph(object):
-    def __init__(self, x, y, width, height, title,
+    def __init__(self, x, y, width, height, title, update_period,
                  bg_color=Color(255, 255, 255), out_file=None):
-        
+
         self.rect = Rect(x, y, width, height)
         self.title_image = get_text_font().render(title, True, Color(0, 0, 0), bg_color)
         self.bg_color = bg_color
+        self.update_period = update_period
+        self.counter = 0
         
         if out_file != None:
             self.out = open(out_file, "w")
@@ -34,6 +47,12 @@ class Graph(object):
             self.out = None
 
     def update(self):
+        self.counter += 1
+        if self.counter >= self.update_period:
+            self.update_inner()
+            self.counter = 0
+
+    def update_inner(self):
         raise NotImplementedError("Override in your subclass")
     
     def finish(self):
@@ -49,11 +68,11 @@ class Graph(object):
 
 
 class LineGraph(Graph):
-    def __init__(self, x, y, width, height, title, high, scale_division,
+    def __init__(self, x, y, width, height, title, update_period, high, scale_division,
                  bg_color=Color(255, 255, 255),
                  fg_color=Color(50, 50, 50), out_file=None):
         
-        Graph.__init__(self, x, y, width, height, title, bg_color, out_file)
+        Graph.__init__(self, x, y, width, height, title, update_period, bg_color, out_file)
 
         self.zero_surface = get_text_font().render("0", True, Color(0, 0, 0), bg_color)
         self.high_surface = get_text_font().render(str(high), True, Color(0, 0, 0), bg_color)
@@ -109,35 +128,43 @@ class PopulationGraph(LineGraph):
     def __init__(self, world, x, y, width, height, high,
                  scale_division, update_period, out_file=None):
         
-        LineGraph.__init__(self, x, y, width, height,
-                           "Population vs Time", high, scale_division,
+        LineGraph.__init__(self, x, y, width, height, "Population vs Time",
+                           update_period, high, scale_division,
                            Color(200, 200, 200), Color(80, 80, 150), out_file)
-
+        
         self.world = world
-        self.update_period = update_period
-        self.counter = 0
 
-    def update(self):
-        self.counter += 1
-        if self.counter > self.update_period:
-            self.add_data_point(self.world.object_count["Critter"])
-            self.counter = 0
+    def update_inner(self):
+        self.add_data_point(self.world.object_count["Critter"])
 
 
 class FoodGraph(LineGraph):
     def __init__(self, world, x, y, width, height, high,
                  scale_division, update_period, out_file=None):
         
-        LineGraph.__init__(self, x, y, width, height,
-                           "Food level vs Time", high, scale_division,
+        LineGraph.__init__(self, x, y, width, height, "Food level vs Time",
+                           update_period, high, scale_division,
                            Color(200, 200, 200), Color(80, 150, 80), out_file)
 
         self.world = world
-        self.update_period = update_period
-        self.counter = 0
 
-    def update(self):
-        self.counter += 1
-        if self.counter > self.update_period:
-            self.add_data_point(self.world.object_count["Food"])
-            self.counter = 0
+    def update_inner(self):
+        self.add_data_point(self.world.object_count["Food"])
+
+
+class AgentTraitGraph(LineGraph):
+    def __init__(self, world, trait, x, y, width, height, title,
+                 high, scale_division, update_period, out_file=None):
+
+        LineGraph.__init__(self, x, y, width, height, title, update_period,
+                           high, scale_division, Color(200, 200, 200), Color(150, 80, 80), out_file)
+
+        self.trait = trait
+        self.world = world
+
+    def update_inner(self):
+        self.add_data_point(mean(obj.agent.traits[self.trait]
+                                 for obj in self.world.objects
+                                 if obj.get_type() == "Critter"))
+
+    

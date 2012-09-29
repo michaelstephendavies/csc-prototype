@@ -58,6 +58,10 @@ class Config:
         "food_graph_high": int,
         "food_graph_scale_division": int,
         "food_graph_update_period": int,
+        "agent_move_speed_graph": int,
+        "agent_move_speed_graph_high": float,
+        "agent_move_speed_graph_scale_division": float,
+        "agent_move_speed_graph_update_period": int,
         
         # Graphical settings
         "framerate": int,
@@ -186,6 +190,7 @@ class World(object):
             num_graphs = 0
             if config.population_graph: num_graphs += 1
             if config.food_graph: num_graphs += 1
+            if config.agent_move_speed_graph: num_graphs += 1
 
             # Allocate vertical space to each graph.
             # In total, one padding is needed for each graph, plus one extra
@@ -208,6 +213,15 @@ class World(object):
                                                  vertical_space_per_graph, config.food_graph_high,
                                                  config.food_graph_scale_division,
                                                  config.food_graph_update_period))
+                    current_y += vertical_space_per_graph + padding
+
+                if config.agent_move_speed_graph:
+                    self.graphs.append(AgentTraitGraph(self, "agent_move_speed",
+                                                       config.world_width, current_y, config.graph_width,
+                                                       vertical_space_per_graph, "Average move speed vs Time",
+                                                       config.agent_move_speed_graph_high,
+                                                       config.agent_move_speed_graph_scale_division,
+                                                       config.agent_move_speed_graph_update_period))
                     current_y += vertical_space_per_graph + padding
                 
         

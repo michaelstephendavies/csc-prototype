@@ -101,13 +101,20 @@ graph_width = 200
 population_graph = 1
 population_graph_high = 50
 population_graph_scale_division = 10
-population_graph_update_period = 5
+population_graph_update_period = 15
 
 # Graph showing food levels over time
 food_graph = 1
 food_graph_high = 50
 food_graph_scale_division = 10
-food_graph_update_period = 5
+food_graph_update_period = 15
+
+# Graph showing average agent_move_speed value across
+# all alive critters over time
+agent_move_speed_graph = 1
+agent_move_speed_graph_high = 3
+agent_move_speed_graph_scale_division = 0.5
+agent_move_speed_graph_update_period = 50
 
 # ------------------
 # Graphical settings
