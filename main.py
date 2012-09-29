@@ -47,6 +47,18 @@ class Config:
         "agent_move_speed_min": float,
         "agent_move_speed_max": float,
 
+        # Graph settings
+        "enable_graphs": int,
+        "graph_width": int,
+        "population_graph": int,
+        "population_graph_high": int,
+        "population_graph_scale_division": int,
+        "population_graph_update_period": int,
+        "food_graph": int,
+        "food_graph_high": int,
+        "food_graph_scale_division": int,
+        "food_graph_update_period": int,
+        
         # Graphical settings
         "framerate": int,
         "tile_size": int,
@@ -128,6 +140,7 @@ class Config:
             else:
                 self.scenery.append([type, int(x), int(y)])
 
+        # world dimensions in pixels
         self.world_width = self.cols * self.settings["tile_size"]
         self.world_height = self.rows * self.settings["tile_size"]          
 
@@ -157,6 +170,45 @@ class World(object):
         self.config = config
         self.skeletons = []
         self.objects = []
+
+        # Map from object type string (return value from Object.get_type)
+        # to number of objects of that type
+        self.object_count = {"Critter": 0, "Food": 0}
+        
+        # Initialise graphs
+        self.graphs = []
+        if config.enable_graphs:
+            self.sidebar_rect = Rect(self.config.world_width, 0,
+                                     self.config.graph_width, self.config.world_height)
+            self.sidebar_color = Color(200, 200, 200)
+            
+            num_graphs = 0
+            if config.population_graph: num_graphs += 1
+            if config.food_graph: num_graphs += 1
+
+            # Allocate vertical space to each graph.
+            # In total, one padding is needed for each graph, plus one extra
+            # padding at the top. The rest of the space is divided equally
+            # between the graphs.
+            if num_graphs > 0:
+                padding = 5
+                vertical_space_per_graph = (config.world_height - (num_graphs+1)*padding)/num_graphs
+                current_y = padding
+                
+                if config.population_graph:
+                    self.graphs.append(PopulationGraph(self, config.world_width, current_y, config.graph_width,
+                                                       vertical_space_per_graph, config.population_graph_high,
+                                                       config.population_graph_scale_division,
+                                                       config.population_graph_update_period))
+                    current_y += vertical_space_per_graph + padding
+
+                if config.food_graph:
+                    self.graphs.append(FoodGraph(self, config.world_width, current_y, config.graph_width,
+                                                 vertical_space_per_graph, config.food_graph_high,
+                                                 config.food_graph_scale_division,
+                                                 config.food_graph_update_period))
+                    current_y += vertical_space_per_graph + padding
+                
         
         # add scenery to objects
         for item in self.config.scenery:
@@ -198,27 +250,33 @@ class World(object):
                                     self.config.small_object_offset))
                    
         for i in xrange(5):
-            self.objects.append(Critter(config, self, len(self.objects),
+            self.add(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
-                            random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "m")) # TODO: random counter_offset
+                            random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "m"))
         
         for i in xrange(5):
-            self.objects.append(Critter(config, self, len(self.objects),
+            self.add(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
                             random.randint(0, 5), 2*self.config.ageing_interval, get_female_images(), "f"))
-            
+        
         for i in xrange(10):
-            self.objects.append(Food(config, self, len(self.objects), random.random()*self.config.world_width,
+            self.add(Food(config, self, len(self.objects), random.random()*self.config.world_width,
                 random.random()*self.config.world_height, self.config.food_energy))
     
     def delete(self, obj):
-        obj.kill()        
+        obj.kill()
         self.objects.remove(obj)
+
+        if obj.get_type() in self.object_count:
+            self.object_count[obj.get_type()] -= 1
 
     def add(self, new_obj):
         self.objects.append(new_obj)
+        
+        if new_obj.get_type() in self.object_count:
+            self.object_count[new_obj.get_type()] += 1
         
     def add_skeleton(self, new_skeleton):
         self.skeletons.append(new_skeleton)
@@ -238,8 +296,6 @@ class World(object):
         "s" : get_tile_sand(),
         "i" : get_tile_dirt()
         }
-
-        test_graph = LineGraph(5, 5, 200, 100, "Population vs Time", 50, 10, Color(200, 200, 200), Color(80, 80, 150))
         
         # variables to help the eagle and dove only sometimes
         # fly accross 
@@ -250,8 +306,7 @@ class World(object):
         dove_on = True
         dove_x = 0.1*self.config.world_width # first x channel
         dove_y = 0
-        dove_start = 0
-        
+        dove_start = 0        
         
         while True:
             clock = pygame.time.Clock()
@@ -274,7 +329,10 @@ class World(object):
             if counter % self.config.food_spawn_period == 0:
                 self.add(Food(config, self, 0, random.random()*self.config.world_width,
                               random.random()*self.config.world_height, self.config.food_energy))
-                
+
+            for graph in self.graphs:
+                graph.update()
+            
             self.objects.sort(key = lambda obj: obj.y)
             
             for skeleton in self.skeletons:
@@ -310,8 +368,10 @@ class World(object):
                 dove_start = counter
                 dove_x = (random.randint(1, 9)/10)*self.config.world_width
 
-            test_graph.add_data_point(len([obj for obj in self.objects if obj.get_type() == "Critter"]))
-            test_graph.render(self.screen)
+            if self.config.enable_graphs:
+                self.screen.fill(self.sidebar_color, self.sidebar_rect)
+                for graph in self.graphs:
+                    graph.render(self.screen)
             
             counter += 1    
             
@@ -331,5 +391,11 @@ if __name__ == '__main__':
     
     pygame.init()
     pygame.font.init()
-    screen = pygame.display.set_mode((config.world_width, config.world_height))
+    
+    if config.enable_graphs:
+        # Leave some space on the right of the world to show graphs
+        screen = pygame.display.set_mode((config.world_width + config.graph_width, config.world_height))
+    else:
+        screen = pygame.display.set_mode((config.world_width, config.world_height))
+    
     World(screen, config).run()

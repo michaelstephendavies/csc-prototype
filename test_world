@@ -50,9 +50,9 @@ collision_radius = 10
 # Set to 0 to disable entirely.
 agent_trait_variance = 0.4
 
-# Each trait is defined by three config settings
-# <trait name> - trait value held by the initial critters at world start
-# <trait name>_min, <trait name>_max - lower and upper bound on trait values
+# Each trait is characterised by three config settings
+# <traitname> - trait value held by the initial critters at world start
+# <traitname>_min, <traitname>_max - lower and upper bound on trait values
 
 # Amount of energy a critter must have before considering spending it
 # on making children
@@ -77,6 +77,37 @@ mean_turn_interval_max = 5
 agent_move_speed = 0.5
 agent_move_speed_min = 0
 agent_move_speed_max = 3
+
+# --------------
+# Graph settings
+# --------------
+
+# Set to 0 to disable graphs entirely, nonzero to use graphs
+enable_graphs = 1
+
+# Width of graphs in pixels
+graph_width = 200
+
+# Each graph is characterised by 4 settings:
+# <graphname> - set to 0 to hide this graph, nonzero to show it
+# <graphname>_high - highest possible y-value the graph can show;
+#                    increase it to increase the vertical graph scale
+# <graphname>_scale_division - amount of y-value space between scale marks;
+#                              should divide into <graphname>_high exactly
+# <graphname>_update_period - number of frames represented by a single pixel
+#                             on the x-axis
+
+# Graph showing critter population over time
+population_graph = 1
+population_graph_high = 50
+population_graph_scale_division = 10
+population_graph_update_period = 5
+
+# Graph showing food levels over time
+food_graph = 1
+food_graph_high = 50
+food_graph_scale_division = 10
+food_graph_update_period = 5
 
 # ------------------
 # Graphical settings

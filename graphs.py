@@ -23,6 +23,7 @@ def float_xrange(start, stop, step):
 class Graph(object):
     def __init__(self, x, y, width, height, title,
                  bg_color=Color(255, 255, 255), out_file=None):
+        
         self.rect = Rect(x, y, width, height)
         self.title_image = get_text_font().render(title, True, Color(0, 0, 0), bg_color)
         self.bg_color = bg_color
@@ -32,6 +33,9 @@ class Graph(object):
         else:
             self.out = None
 
+    def update(self):
+        raise NotImplementedError("Override in your subclass")
+    
     def finish(self):
         self.out.close()
     
@@ -100,3 +104,40 @@ class LineGraph(Graph):
                     (self.graph_area_rect.left - self.high_surface.get_width() - 6,
                      self.graph_area_rect.top))
             
+
+class PopulationGraph(LineGraph):
+    def __init__(self, world, x, y, width, height, high,
+                 scale_division, update_period, out_file=None):
+        
+        LineGraph.__init__(self, x, y, width, height,
+                           "Population vs Time", high, scale_division,
+                           Color(200, 200, 200), Color(80, 80, 150), out_file)
+
+        self.world = world
+        self.update_period = update_period
+        self.counter = 0
+
+    def update(self):
+        self.counter += 1
+        if self.counter > self.update_period:
+            self.add_data_point(self.world.object_count["Critter"])
+            self.counter = 0
+
+
+class FoodGraph(LineGraph):
+    def __init__(self, world, x, y, width, height, high,
+                 scale_division, update_period, out_file=None):
+        
+        LineGraph.__init__(self, x, y, width, height,
+                           "Food level vs Time", high, scale_division,
+                           Color(200, 200, 200), Color(80, 150, 80), out_file)
+
+        self.world = world
+        self.update_period = update_period
+        self.counter = 0
+
+    def update(self):
+        self.counter += 1
+        if self.counter > self.update_period:
+            self.add_data_point(self.world.object_count["Food"])
+            self.counter = 0
