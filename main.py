@@ -342,6 +342,7 @@ class World(object):
         
         while True:
             clock = pygame.time.Clock()
+            
             clock.tick(self.config.framerate)
             
             for event in pygame.event.get():
