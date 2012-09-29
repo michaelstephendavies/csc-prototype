@@ -71,6 +71,33 @@ class Agent(object):
                     reproduction_target = obj
                     self.clock = 0
                     break
+                
+        # check whether he is currently avoiding
+        if critter.avoidance_countdown > 0:
+            critter.avoidance_countdown -= 1
+            return (0, 
+                        self.traits["agent_move_speed"], reproduction_target)
+
+        # object avoidance
+        avoidable_things = [(obj, dx, dy) for (obj, dx, dy) in visible_objects
+                                  if obj.get_type() == "Critter" 
+                                  or obj.get_type() == "Scenery"]
+        for thing in avoidable_things:
+            if thing[0].get_type() == "Critter" and \
+                    thing[1]**2 + thing[2]**2 <= self.config.critter_avoidance_radius**2:
+                angle = atan2(-thing[2], -thing[1])
+                critter.avoidance_countdown = self.config.avoidance_time*self.config.framerate
+                return (angle - 
+                        critter.direction, 
+                        self.traits["agent_move_speed"], reproduction_target)
+            elif thing[0].get_type() == "Scenery" and \
+                    thing[1]**2 + thing[2]**2 <= self.config.scenery_avoidance_radius**2:
+                angle = atan2(-thing[2], -thing[1])
+                critter.avoidance_countdown = self.config.avoidance_time*self.config.framerate
+                return (angle - 
+                        critter.direction, 
+                        self.traits["agent_move_speed"], reproduction_target)
+        
 
         # Look for food
         visible_food_positions = [(dx, dy) for (obj, dx, dy) in visible_objects

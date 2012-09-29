@@ -83,6 +83,7 @@ class Critter(Object):
             self.age = age
             self.heart_countdown = 0
             self.gender = gender
+            self.avoidance_countdown = 0
 
         def update(self):
             # Find all objects close enough to be visible to the agent;
@@ -217,6 +218,8 @@ class Scenery(Object):
         self.vertical_offset = vertical_offset
 
     def render(self, screen):
+        foo = 0, 0, 0
+        pygame.draw.circle(self.image, foo, (self.horizontal_offset, self.vertical_offset), 5)
         screen.blit(self.image, (self.x - self.horizontal_offset,
                                  self.y - self.vertical_offset))
 

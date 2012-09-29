@@ -26,6 +26,8 @@ class Config:
         "critter_max_move_speed": float,
         "maturity_age": int,
         "reproduction_radius": float,
+        "starting_males" : int,
+        "starting_females" : int, 
         
         # Food settings
         "food_spawn_period": int,
@@ -46,6 +48,9 @@ class Config:
         "agent_move_speed": float,
         "agent_move_speed_min": float,
         "agent_move_speed_max": float,
+        "critter_avoidance_radius" : int,
+        "scenery_avoidance_radius" : int,
+        "avoidance_time" : float,
 
         # Graph settings
         "enable_graphs": int,
@@ -124,6 +129,7 @@ class Config:
         self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
         self.collision_radius_sq = self.settings["collision_radius"]**2
         self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
+        self.scenery_avoidance_radius_sq = self.settings["scenery_avoidance_radius"]**2
         
         # the bit to do the world spec
         spec_file = open(spec_filename)
@@ -264,13 +270,13 @@ class World(object):
                                     get_pink_flowers(), self.config.small_object_offset, 
                                     self.config.small_object_offset))
                    
-        for i in xrange(5):
+        for i in xrange(self.config.starting_males):
             self.add(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
                             random.randint(0, 5), 2*self.config.ageing_interval, get_male_images(), "m"))
         
-        for i in xrange(5):
+        for i in xrange(self.config.starting_females):
             self.add(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
                     *self.config.world_height, random.randint(0, 5), 
@@ -288,6 +294,18 @@ class World(object):
             self.object_count[obj.get_type()] -= 1
 
     def add(self, new_obj):
+        # make sure the food is not too close to scenery, this messes
+        # with the collision avoidance
+        can_add = True
+        if new_obj.get_type() == "Food":
+            for obj in self.objects:
+                 if new_obj.distance_sq(obj) < 1.5*self.config.scenery_avoidance_radius_sq:
+                     new_obj.x += random.random()*self.config.world_width
+                     new_obj.x %= self.config.world_width
+                     new_obj.y += random.random()*self.config.world_height
+                     new_obj.y %= self.config.world_height
+                     self.add(new_obj)
+                     return
         self.objects.append(new_obj)
         
         if new_obj.get_type() in self.object_count:
