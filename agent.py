@@ -1,3 +1,15 @@
+"""
+agent.py
+
+Contains the AI code which controls critters.
+
+Currently contains basic heuristic behaviour, but could forseeably
+be replaced with something more advanced.
+
+Michael Davies and David Shorten
+CSC3003S Capstone Project
+"""
+
 from objects import *
 import random
 from math import *
@@ -8,7 +20,13 @@ def bound(x, a, b):
     return x
 
 class Agent(object):
+    """ The "brain" of a single critter, which controls its actions.
+    Not to be confused with Critter, which is more like a critter's
+    "physical body" which itself contains an agent. """
     
+    # The current heuristic behaviour is to some extent controlled
+    # by these four floating-point valued "traits", which differ between
+    # critters and are "inherited" from parents.
     trait_names = [
         "reproduction_period",
         "reproduction_energy_threshold",
@@ -17,6 +35,10 @@ class Agent(object):
     ]
     
     def __init__(self, config, parent1=None, parent2=None):
+        """ Create a new Agent.
+
+        parent1, parent2 - the Agents of the two parents, or
+                           None if this agent belongs to one of the initial critters. """
         self.config = config
         self.clock = 0
         self.avoidance_countdown = 0
@@ -87,9 +109,9 @@ class Agent(object):
                     thing[1]**2 + thing[2]**2 <= self.config.critter_avoidance_radius**2:
                 angle = atan2(-thing[2], -thing[1])
                 self.avoidance_countdown = self.config.avoidance_time*self.config.framerate
-                return (angle - 
-                        critter.direction, 
+                return (angle - critter.direction, 
                         self.traits["agent_move_speed"], reproduction_target)
+            
             elif thing[0].get_type() == "Scenery" and \
                     thing[1]**2 + thing[2]**2 <= self.config.scenery_avoidance_radius**2:
                 angle = atan2(-thing[2], -thing[1])

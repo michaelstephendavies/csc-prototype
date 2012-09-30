@@ -1,18 +1,34 @@
+"""
+images.py
+
+Loads images and stores them in a single, localised location.
+This prevents multiple copies of the same image from being loaded
+unnecessarily.
+
+The first time a function from this module is called, the image is
+loaded and returned; on subsequent calls, a reference to that same image
+is returned.
+"""
+
 import pygame
 
 male_images = None
 
 def get_male_images():
-    # Returns list of lists where:
-    #  first list is the animation frames for walking east
-    #  second list is the animation frames for walking south
-    #  second list is the animation frames for walking west
-    #  second list is the animation frames for walking north
+    """ Get the sprites for the male critter.
+
+    Returns a three-dimensional list where:
+    * the first dimension (from 0 to 3) gives the critter's "life stage"
+      (0=child, 1=teenager, 2=adult, 3=elder)
+    * the second dimension (from 0 to 4) gives the direction the critter
+      is facing (0=east, 1=south, 2=west, 3=north)
+    * the third dimension gives the animation frame. """
 
     global male_images
     
     if male_images == None:
         male_images = [
+            # child
             [
                 # east
                 [
@@ -35,6 +51,7 @@ def get_male_images():
                     pygame.image.load('images/boy_north2.png').convert()
                 ]
             ],
+            # teen
             [
                 # east
                 [
@@ -57,6 +74,7 @@ def get_male_images():
                     pygame.image.load('images/teen_north2.png').convert()
                 ]
             ],
+            # adult
             [
                 # east
                 [
@@ -79,6 +97,7 @@ def get_male_images():
                     pygame.image.load('images/man_north2.png').convert()
                 ]
             ],
+            # elder
             [
                 # east
                 [
@@ -108,16 +127,14 @@ def get_male_images():
 female_images = None
 
 def get_female_images():
-    # Returns list of lists where:
-    #  first list is the animation frames for walking east
-    #  second list is the animation frames for walking south
-    #  second list is the animation frames for walking west
-    #  second list is the animation frames for walking north
+    """ Get the sprites for the female critter. Return value
+    is in the same format as get_male_images. """
 
     global female_images
     
     if female_images == None:
         female_images = [
+            # child
             [
                 # east
                 [
@@ -140,6 +157,7 @@ def get_female_images():
                     pygame.image.load('images/girl_north2.png').convert()
                 ]
             ],
+            # teen
             [
                 # east
                 [
@@ -162,6 +180,7 @@ def get_female_images():
                     pygame.image.load('images/teeng_north2.png').convert()
                 ]
             ],
+            # adult
             [
                 # east
                 [
@@ -184,6 +203,7 @@ def get_female_images():
                     pygame.image.load('images/woman_north2.png').convert()
                 ]
             ],
+            # elder
             [
                 # east
                 [
@@ -213,26 +233,30 @@ def get_female_images():
 eagle = None
 
 def get_eagle():
+    """ Get the eagle sprites. Returns a list containing the
+    animation frames. """
     global eagle
 
     if eagle == None:
         eagle = [
-                 pygame.image.load('images/eagle1.png').convert_alpha(),
-                 pygame.image.load('images/eagle2.png').convert_alpha()
-                 ]
+            pygame.image.load('images/eagle1.png').convert_alpha(),
+            pygame.image.load('images/eagle2.png').convert_alpha()
+        ]
 
     return eagle
 
 dove = None
 
 def get_dove():
+    """ Get the dove sprites. Returns a list containing the
+    animation frames. """
     global dove
 
     if dove == None:
         dove = [
-                 pygame.image.load('images/dove1.png').convert_alpha(),
-                 pygame.image.load('images/dove2.png').convert_alpha()
-                 ]
+            pygame.image.load('images/dove1.png').convert_alpha(),
+            pygame.image.load('images/dove2.png').convert_alpha()
+        ]
 
     return dove
 

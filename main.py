@@ -1,3 +1,15 @@
+"""
+main.py
+
+Contains the central World object which runs the main
+simulation loop.
+
+Usage: python main.py config_file world_spec_file
+
+Michael Davies and David Shorten
+CSC3003S Capstone Project
+"""
+
 from __future__ import division
 
 import os, sys
@@ -12,172 +24,22 @@ random.seed()
 from images import *
 from objects import *
 from graphs import *
-
-class Config:
-
-    # Map from setting name to a string parsing function
-    setting_dict = {
-        "random_seed": str,
-        
-        # Critter settings
-        "initial_energy": float,
-        "critter_energy_decay_rate": float,
-        "reproduction_cost": float,
-        "critter_view_distance": float,
-        "critter_max_move_speed": float,
-        "maturity_age": int,
-        "reproduction_radius": float,
-        "starting_males" : int,
-        "starting_females" : int, 
-        
-        # Food settings
-        "food_spawn_period": int,
-        "food_energy": int,
-        "collision_radius": float,
-
-        # Agent settings
-        "agent_trait_variance": float,
-        "reproduction_energy_threshold": float,
-        "reproduction_energy_threshold_min": float,
-        "reproduction_energy_threshold_max": float,
-        "reproduction_period": float,
-        "reproduction_period_min": float,
-        "reproduction_period_max": float,
-        "mean_turn_interval": float,
-        "mean_turn_interval_min": float,
-        "mean_turn_interval_max": float,
-        "agent_move_speed": float,
-        "agent_move_speed_min": float,
-        "agent_move_speed_max": float,
-        "critter_avoidance_radius" : int,
-        "scenery_avoidance_radius" : int,
-        "avoidance_time" : float,
-
-        # Graph settings
-        "enable_graphs": int,
-        "graph_width": int,
-        "population_graph": int,
-        "population_graph_high": int,
-        "population_graph_scale_division": int,
-        "population_graph_update_period": int,
-        "population_graph_export_path": str,
-        "food_graph": int,
-        "food_graph_high": int,
-        "food_graph_scale_division": int,
-        "food_graph_update_period": int,
-        "food_graph_export_path": str,
-        "agent_move_speed_graph": int,
-        "agent_move_speed_graph_high": float,
-        "agent_move_speed_graph_scale_division": float,
-        "agent_move_speed_graph_update_period": int,
-        "agent_move_speed_graph_export_path": str,
-        
-        # Graphical settings
-        "framerate": int,
-        "tile_size": int,
-        "animation_frame_interval": int,
-        "critter_vertical_center": int,
-        "critter_horizontal_center": int,
-        "food_horizontal_offset" : int,
-        "food_vertical_offset" : int, 
-        "tree_horizontal_offset" : int,
-        "tree_vertical_offset" : int,
-        "palm_vertical_offset" : int,
-        "ageing_interval" : int,
-        "heart_time" : int,
-        "heart_offset" : int,
-        "skeleton_vertical_offset" : int,
-        "skeleton_horizontal_offset" : int,
-        "skeleton_time" : int,
-        "small_object_offset" : int
-    }
-        
-    tiles_dict = {
-                  "daisies" : "d",
-                  "hill" :  "h",
-                  "long_grass" : "l",
-                  "pit" : "p",
-                  "sand" : "s",
-                  "dirt" : "i",
-                  }   
-   
-    def __init__(self, conf_filename, spec_filename):
-        self.settings = {}
-        errors = []
-        
-        conf_string = "setups/" + conf_filename
-        conf_path = path.relpath(conf_string)
-        with open(conf_path) as conf_file:
-            for line in conf_file.readlines():
-                line = line.strip()
-                if (not line.startswith("#")) and line != "":
-                    (key, value) = line.split("=")
-                    key = key.strip()
-                    value = value.strip()
-                    try:
-                        parse_function = Config.setting_dict[key]
-                        try:
-                            self.settings[key] = parse_function(value)
-                        except:
-                            # parse_function threw an exception
-                            errors.append("Invalid value for '{0}': {1}".format(key, value))
-                            
-                    except KeyError:
-                        errors.append("Unknown config setting: {0}".format(key))
-
-        for setting in Config.setting_dict.iterkeys():
-            if setting not in self.settings:
-                errors.append("Missing config setting: {0}".format(setting))
-
-        if errors != []:
-            raise ConfigParseException("\n".join(errors))
-                
-        self.critter_view_distance_sq = self.settings["critter_view_distance"]**2
-        self.collision_radius_sq = self.settings["collision_radius"]**2
-        self.reproduction_radius_sq = self.settings["reproduction_radius"]**2
-        self.scenery_avoidance_radius_sq = self.settings["scenery_avoidance_radius"]**2
-        
-        # the bit to do the world spec
-        spec_string = "setups/" + spec_filename
-        spec_path = path.relpath(spec_string)
-        spec_file = open(spec_path)
-        first_line = spec_file.readline()
-        (rows, cols) = first_line.split()
-        self.rows = int(rows)
-        self.cols = int(cols)
-        
-        # making something to hold info on
-        self.scenery = []                
-        # making a matrix of g's
-        self.tile_spec = [["g" for a in xrange(self.rows)] for b in xrange(int(self.cols))]
-        # adding in the other tiles
-        for line in spec_file:
-            (type, colon, x, y) = line.split()
-            if type in self.tiles_dict:
-                letter = self.tiles_dict[type]
-                self.tile_spec[int(x)][int(y)] = letter   
-            else:
-                self.scenery.append([type, int(x), int(y)])
-
-        # world dimensions in pixels
-        self.world_width = self.cols * self.settings["tile_size"]
-        self.world_height = self.rows * self.settings["tile_size"]          
-
-    def __getitem__(self, name):
-        # Operator overload for "config[name]"
-        return getattr(self, name)
-    
-    def __getattr__(self, name):
-        # Called when an attribute of a Config object is found, but Python
-        # can't find it normally. Instead we return the correct config value.
-        return self.settings[name]
-    
-class ConfigParseException(Exception):
-    pass
-
+from config import *
 
 class World(object):
+    """ Stores all the simulation objects and runs the main
+    simulation loop.
+
+    Publically accessible attributes (read-only):
+    self.objects - List containing all Objects, excluding skeletons.
+    self.object_count - Map from object type string ("Critter" or "Food")
+                        to the current number of objects of that type.
+                        (Scenery is not tracked.)"""
+    
     def __init__(self, screen, config):
+        """ Create a new World, given the Pygame Surface to draw to and
+        the configuration settings (a Config object). Call run to actually
+        start the simulation. """
         
         # The simulation model has a toroidal topology (x and y co-ordinates
         # "wrap around"); we keep all x values in [0, width) and y values in
@@ -185,6 +47,7 @@ class World(object):
         
         # (0, 0) in the simulation model maps to the top-left corner,
         # positive y is down. Directions are given with positive being clockwise.
+        
         self.screen = screen
         self.config = config
         self.skeletons = []
@@ -242,7 +105,7 @@ class World(object):
                     current_y += vertical_space_per_graph + padding
                 
         
-        # add scenery to objects
+        # Add scenery from the world specification to the list of objects
         for item in self.config.scenery:
             if item[0] == "palm":
                 self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
@@ -280,7 +143,8 @@ class World(object):
                 self.objects.append(Scenery(self.config, self, 0, item[1], item[2], 
                                     get_pink_flowers(), self.config.small_object_offset, 
                                     self.config.small_object_offset))
-                   
+
+        # Create the initial critters and food
         for i in xrange(self.config.starting_males):
             self.add(Critter(config, self, len(self.objects),
                 random.random()*self.config.world_width, random.random()
@@ -298,13 +162,18 @@ class World(object):
                 random.random()*self.config.world_height, self.config.food_energy))
     
     def delete(self, obj):
+        """ Remove an object (other than a skeleton) from the world. """
         obj.kill()
         self.objects.remove(obj)
 
         if obj.get_type() in self.object_count:
             self.object_count[obj.get_type()] -= 1
 
-    def add(self, new_obj):        
+    def add(self, new_obj):
+        """ Add an object (other than a skeleton) to the world; if the
+        new object is too close to an existing object, it will be placed
+        randomly onto the world. """
+        
         # make sure the food is not too close to scenery, this messes
         # with the collision avoidance
         can_add = True
@@ -320,32 +189,36 @@ class World(object):
         
         if new_obj.get_type() in self.object_count:
             self.object_count[new_obj.get_type()] += 1
-
-    # adds an object without considering whether it is on top of another
-    # object            
+         
     def add_here(self, new_obj):
+        """ Add an object (other than a skeleton) to the world, without
+        repositioning it if it is too close to an existing object. """
         self.objects.append(new_obj)
 
         if new_obj.get_type() in self.object_count:
             self.object_count[new_obj.get_type()] += 1
         
     def add_skeleton(self, new_skeleton):
+        """ Add a skeleton to the world. """
         self.skeletons.append(new_skeleton)
         
     def delete_skeleton(self, skeleton):
+        """ Remove a skeleton from the world. """
         self.skeletons.remove(skeleton)
     
     def run(self):
+        """ Run the simulation. Only returns when the user closes
+        the Pygame window. """
         counter = 0
         
         tiles = {    
-        "g" : get_tile_grass(),
-        "d" : get_tile_daisies(),
-        "h" : get_tile_hill(),
-        "l" : get_tile_long_grass(),
-        "p" : get_tile_pit(),
-        "s" : get_tile_sand(),
-        "i" : get_tile_dirt()
+            "g" : get_tile_grass(),
+            "d" : get_tile_daisies(),
+            "h" : get_tile_hill(),
+            "l" : get_tile_long_grass(),
+            "p" : get_tile_pit(),
+            "s" : get_tile_sand(),
+            "i" : get_tile_dirt()
         }
         
         # variables to help the eagle and dove only sometimes
@@ -358,44 +231,68 @@ class World(object):
         dove_x = 0.1*self.config.world_width # first x channel
         dove_y = 0
         dove_start = 0        
-        
+
+        # Main simulation loop
         while True:
+            
+            # Keep a steady framerate
             clock = pygame.time.Clock()
-            
             clock.tick(self.config.framerate)
-            
+
+            # Check if the user quitted
             for event in pygame.event.get():
                 if event.type == QUIT:
+                    # Allow the graphs to close their output streams
+                    # if necessary
                     for graph in self.graphs:
                         graph.finish()
                     return
 
-            for x in xrange(self.config.cols):
-                for y in xrange(self.config.rows):
-                       self.screen.blit(tiles[self.config.tile_spec[x][y]], 
-                                        (x*self.config.tile_size, y*self.config.tile_size)) 
-        
-            # Iterate over a copy of the object list since modifying a list
-            # while iterating over it is verboten
+            # Update the simulation
+            # ---------------------
+            
+            # Update each object; Iterate over a copy of the object list
+            # since modifying a list while iterating over it is verboten
             for obj in self.objects[:]:
                 obj.update()
-            
+
+            for obj in self.skeletons[:]:
+                obj.update()
+
+            # Maybe spawn some food
             if counter % self.config.food_spawn_period == 0:
                 self.add(Food(config, self, 0, random.random()*self.config.world_width,
                               random.random()*self.config.world_height, self.config.food_energy))
 
+            # Update the graphs
             for graph in self.graphs:
                 graph.update()
+
+            # Render the simulation
+            # ---------------------
             
+            # Sort the objects in order of y-coordinates so that they are
+            # rendered in the correct order: If A is behind B, we have render
+            # A first so that B appears in front.
             self.objects.sort(key = lambda obj: obj.y)
-            
+
+            # Draw the tiles
+            for x in xrange(self.config.cols):
+                for y in xrange(self.config.rows):
+                       self.screen.blit(tiles[self.config.tile_spec[x][y]], 
+                                        (x*self.config.tile_size, y*self.config.tile_size))
+
+            # Draw the objects; draw all the skeletons first so they appear
+            # underneath all the other objects.
             for skeleton in self.skeletons:
                 skeleton.render(self.screen)
 
             for obj in self.objects:
                 obj.render(self.screen)
             
-            # add in the eagle and dove
+            # Update and render the eagle and dove
+            # Since we draw these after all the other objects, they appear
+            # on top.
             frame_choice = int(floor((counter / self.config.framerate)*5) % 2)
             if(eagle_on):
                 if eagle_x > self.config.world_width:
@@ -422,6 +319,7 @@ class World(object):
                 dove_start = counter
                 dove_x = (random.randint(1, 9)/10)*self.config.world_width
 
+            # Draw the graph sidebar
             if self.config.enable_graphs:
                 self.screen.fill(self.sidebar_color, self.sidebar_rect)
                 for graph in self.graphs:
@@ -433,24 +331,33 @@ class World(object):
             
 
 if __name__ == '__main__':
+    # Parse the configuration and world specification
     try:
         config = Config(sys.argv[1], sys.argv[2])
     except ConfigParseException as ex:
         print ex
         sys.exit(1)
+    except IndexError:
+        # User left out a command-line parameter
+        print "USAGE: python main.py config_file world_spec_file"
+        sys.exit(1)
 
+    # Seed the random number generator
     if config.random_seed == "":
         random.seed() # using the OS-specific randomness source
     else:
         random.seed(hash(config.random_seed))
-    
+
+    # Initialise the Pygame library
     pygame.init()
     pygame.font.init()
-    
+
+    # Create the Pygame window to draw onto
     if config.enable_graphs:
         # Leave some space on the right of the world to show graphs
         screen = pygame.display.set_mode((config.world_width + config.graph_width, config.world_height))
     else:
         screen = pygame.display.set_mode((config.world_width, config.world_height))
-    
+
+    # Run the simulation
     World(screen, config).run()

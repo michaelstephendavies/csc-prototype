@@ -1,3 +1,5 @@
+""" A throwaway script used to generate world specification files. """
+
 import random
 
 NUM_TREES = 100
