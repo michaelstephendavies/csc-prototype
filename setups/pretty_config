@@ -1,7 +1,7 @@
 
 # Random number generator seed; can be any string
 # Leave blank to use the OS's randomness source
-random_seed =
+random_seed = fire
 
 # ----------------
 # Critter settings
@@ -15,13 +15,13 @@ starting_females = 10
 initial_energy = 100
 
 # Amount of energy lost by a critter per frame
-critter_energy_decay_rate = 0.15
+critter_energy_decay_rate = 0.2
 
 # Amount of energy spent by critter to make a child
 reproduction_cost = 30
 
 # Critter's vision radius in pixels
-critter_view_distance = 75
+critter_view_distance = -40
 
 # Critter's max move speed in pixels per frame
 critter_max_move_speed = 2
@@ -37,7 +37,7 @@ reproduction_radius = 75
 # -------------
 
 # Number of frames between subsequent food spawns
-food_spawn_period = 30
+food_spawn_period = 10
 
 # Amount of energy contained in a single food item
 food_energy = 50
@@ -114,14 +114,14 @@ population_graph = 1
 population_graph_high = 50
 population_graph_scale_division = 10
 population_graph_update_period = 15
-population_graph_export_path =
+population_graph_export_path = pop.csv
 
 # Graph showing food levels over time
 food_graph = 1
 food_graph_high = 50
 food_graph_scale_division = 10
 food_graph_update_period = 15
-food_graph_export_path =
+food_graph_export_path = 
 
 # Graph showing average agent_move_speed value across
 # all alive critters over time
@@ -129,7 +129,7 @@ agent_move_speed_graph = 1
 agent_move_speed_graph_high = 3
 agent_move_speed_graph_scale_division = 0.5
 agent_move_speed_graph_update_period = 50
-agent_move_speed_graph_export_path =
+agent_move_speed_graph_export_path =  
 
 # ------------------
 # Graphical settings

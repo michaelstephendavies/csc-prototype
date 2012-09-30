@@ -5,6 +5,9 @@ Displays and exports various graphs.
 
 Michael Davies and David Shorten
 CSC3003S Capstone Project
+
+All graphics used in this program are open content and 
+were provided for by REFMAP(http://www.tekepon.net/fsm)
 """
 
 from __future__ import division

@@ -8,6 +8,9 @@ unnecessarily.
 The first time a function from this module is called, the image is
 loaded and returned; on subsequent calls, a reference to that same image
 is returned.
+
+All graphics used in this program are open content and 
+were provided for by REFMAP(http://www.tekepon.net/fsm)
 """
 
 import pygame
